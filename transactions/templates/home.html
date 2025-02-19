@@ -1,11 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyFinPlanner</title>
 </head>
 <body>
     <h1>Bienvenido a MyFinPlanner</h1>
-    <p>Administra tus transacciones de manera fácil y eficiente.</p>
+    <p>Administra tus finanzas de forma sencilla y eficiente</p>
+    
+    <ul>
+        <li><a href="{% url 'transaction_list' %}">📜 Ver Transacciones</a></li>
+        <li><a href="{% url 'add_transaction' %}">➕ Agregar Nueva Transacción</a></li>
+    </ul>
 </body>
 </html>

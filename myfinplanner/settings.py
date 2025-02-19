@@ -52,11 +52,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'myfinplanner.urls'
 
+import os
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # Puedes agregar rutas absolutas aquí si lo deseas
-        'APP_DIRS': True,  # Importante que sea True
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Asegúrate de que esto esté correcto
+        'APP_DIRS': True,  # Esto permite buscar templates en cada aplicación
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',

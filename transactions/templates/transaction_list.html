@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Transacciones</title>
+</head>
+<body>
+    <h1>Lista de Transacciones</h1>
+    <ul>
+        {% for transaction in transactions %}
+            <li>
+                <a href="{% url 'transaction_detail' transaction.id %}">{{ transaction.title }}</a> - {{ transaction.amount }} - {{ transaction.category }}
+            </li>
+        {% empty %}
+            <p>No hay transacciones registradas.</p>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'add_transaction' %}">➕ Agregar Transacción</a>
+    <br>
+    <a href="{% url 'home' %}">🏠 Volver al Inicio</a>
+</body>
+</html>
+
