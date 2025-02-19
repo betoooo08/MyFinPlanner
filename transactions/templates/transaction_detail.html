@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detalles de la Transacción</title>
+</head>
+<body>
+    <h1>{{ transaction.title }}</h1>
+    <p>Monto: {{ transaction.amount }}</p>
+    <p>Categoría: {{ transaction.category }}</p>
+    <p>Descripción: {{ transaction.description }}</p>
+    <p>Fecha: {{ transaction.date }}</p>
+
+    <a href="{% url 'delete_transaction' transaction.id %}">🗑️ Eliminar Transacción</a>
+    <br>
+    <a href="{% url 'transaction_list' %}">🔙 Volver a la lista</a>
+    <br>
+    <a href="{% url 'home' %}">🏠 Volver al Inicio</a>
+</body>
+</html>
