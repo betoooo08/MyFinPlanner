@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Dashboard</h2>
+        <div>
+            <a href="{% url 'add_transaction' %}" class="btn btn-primary">➕ Agregar Transacción</a>
+            <a href="{% url 'create_budget' %}" class="btn btn-secondary">💰 Establecer Presupuesto</a>
+            <a href="{% url 'transaction_detail' %}" class="btn btn-info">📄 Ver Transacciones</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-3">
+            <div class="card p-3">
+                <h5>Total Balance</h5>
+                <p class="h3">$12,546.00</p>
+                <small>+ $1,234.00 desde el mes pasado</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card p-3">
+                <h5>Ingresos</h5>
+                <p class="h3">$4,395.00</p>
+                <small>+ $545.00 desde el mes pasado</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card p-3">
+                <h5>Gastos</h5>
+                <p class="h3">$2,850.00</p>
+                <small>- $125.00 desde el mes pasado</small>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card p-3">
+                <h5>Inversiones</h5>
+                <p class="h3">$8,350.00</p>
+                <small>+ $1,100.00 desde el mes pasado</small>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Últimas Transacciones</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.date }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>${{ transaction.amount }}</td>
+                <td>
+                    <a href="{% url 'transaction_detail' transaction.id %}" class="btn btn-sm btn-info">👁 Ver Detalles</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+    
+    {% block content %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,10 +13,11 @@
     <p>Descripción: {{ transaction.description }}</p>
     <p>Fecha: {{ transaction.date }}</p>
 
-    <a href="{% url 'delete_transaction' transaction.id %}">🗑️ Eliminar Transacción</a>
+ <a href="{% url 'delete_transaction' transaction.id %}">🗑️ Eliminar Transacción</a> 
     <br>
     <a href="{% url 'transaction_list' %}">🔙 Volver a la lista</a>
     <br>
     <a href="{% url 'home' %}">🏠 Volver al Inicio</a>
 </body>
 </html>
+    {% endblock %}
