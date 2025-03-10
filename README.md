@@ -2,8 +2,6 @@
 
 MyFinPlanner es una aplicación web para la **gestión de finanzas personales**. Con una interfaz moderna, intuitiva y responsiva, te ayuda a registrar transacciones, controlar presupuestos, obtener recomendaciones basadas en inteligencia artificial y visualizar tus finanzas a través de dashboards interactivos.
 
-![Logo o Screenshot del Proyecto](ruta/a/tu/screenshot.png)
-
 ## Características
 
 - **Dashboard interactivo:**  
