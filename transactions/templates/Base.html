@@ -9,11 +9,24 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="bg-dark text-white p-3 vh-100" style="width: 250px;">
-            <h4 class="mb-4">💰 MyFinPlanner</h4>
+            <!-- Logo / Nombre principal -->
+            <h4 class="mb-4">
+                <!-- Este enlace te lleva al "home", que actualmente renderiza dashboard.html -->
+                <a href="{% url 'home' %}" class="nav-link text-white">💰MyFinPlanner</a>
+            </h4>
             <ul class="nav flex-column">
-                <li class="nav-item"><a href="#" class="nav-link text-white">📊 Dashboard</a></li>
-                <li class="nav-item"><a href="#" class="nav-link text-white">📜 Transacciones</a></li>
-                <li class="nav-item"><a href="#" class="nav-link text-white">💸 Presupuestos</a></li>
+                <!-- Enlace a la misma vista "home" (dashboard) -->
+                <li class="nav-item">
+                    <a href="{% url 'home' %}" class="nav-link text-white">📊 Dashboard</a>
+                </li>
+                <!-- Enlace a la lista de transacciones -->
+                <li class="nav-item">
+                    <a href="{% url 'transaction_list' %}" class="nav-link text-white">📜 Transacciones</a>
+                </li>
+                <!-- Enlace a la creación o vista de presupuestos (según tu configuración) -->
+                <li class="nav-item">
+                    <a href="{% url 'create_budget' %}" class="nav-link text-white">💸 Presupuestos</a>
+                </li>
             </ul>
         </div>
 

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-4">
@@ -7,37 +8,41 @@
         <div>
             <a href="{% url 'add_transaction' %}" class="btn btn-primary">➕ Agregar Transacción</a>
             <a href="{% url 'create_budget' %}" class="btn btn-secondary">💰 Establecer Presupuesto</a>
-            <a href="{% url 'transaction_detail' %}" class="btn btn-info">📄 Ver Transacciones</a>
+            <a href="{% url 'transaction_list' %}" class="btn btn-info">📄 Ver Transacciones</a>
         </div>
     </div>
 
     <div class="row">
+        <!-- Balance -->
         <div class="col-md-6 col-lg-3">
             <div class="card p-3">
                 <h5>Total Balance</h5>
-                <p class="h3">$12,546.00</p>
-                <small>+ $1,234.00 desde el mes pasado</small>
+                <p class="h3">${{ total_balance }}</p>
+                <small>Balance actual (Ingresos - Gastos)</small>
             </div>
         </div>
+        <!-- Ingresos -->
         <div class="col-md-6 col-lg-3">
             <div class="card p-3">
                 <h5>Ingresos</h5>
-                <p class="h3">$4,395.00</p>
-                <small>+ $545.00 desde el mes pasado</small>
+                <p class="h3">${{ total_ingresos }}</p>
+                <small>Suma de transacciones con categoría "ingreso"</small>
             </div>
         </div>
+        <!-- Gastos -->
         <div class="col-md-6 col-lg-3">
             <div class="card p-3">
                 <h5>Gastos</h5>
-                <p class="h3">$2,850.00</p>
-                <small>- $125.00 desde el mes pasado</small>
+                <p class="h3">${{ total_gastos }}</p>
+                <small>Suma de "food", "rent", "utilities", "entertainment" y "other"</small>
             </div>
         </div>
+        <!-- Inversiones (ejemplo, sin implementar) -->
         <div class="col-md-6 col-lg-3">
             <div class="card p-3">
                 <h5>Inversiones</h5>
-                <p class="h3">$8,350.00</p>
-                <small>+ $1,100.00 desde el mes pasado</small>
+                <p class="h3">-</p>
+                <small>Por implementar</small>
             </div>
         </div>
     </div>
