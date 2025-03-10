@@ -1,16 +1,19 @@
 {% extends "base.html" %}
-
 {% block content %}
 <div class="container mt-4">
-  <h1>Agregar Nueva Transacción</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Guardar</button>
-  </form>
-  <br>
-  <a href="{% url 'transaction_list' %}">🔙 Volver a la lista</a>
-  <br>
-  <a href="{% url 'home' %}">🏠 Volver al Inicio</a>
+  <div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+      <h2 class="mb-0">Agregar Nueva Transacción</h2>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </form>
+      <hr>
+      <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Volver a la Lista</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

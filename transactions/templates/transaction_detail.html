@@ -1,23 +1,23 @@
-{% extends "base.html" %}
-    
-    {% block content %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Detalles de la Transacción</title>
-</head>
-<body>
-    <h1>{{ transaction.title }}</h1>
-    <p>Monto: {{ transaction.amount }}</p>
-    <p>Categoría: {{ transaction.category }}</p>
-    <p>Descripción: {{ transaction.description }}</p>
-    <p>Fecha: {{ transaction.date }}</p>
-
- <a href="{% url 'delete_transaction' transaction.id %}">🗑️ Eliminar Transacción</a> 
-    <br>
-    <a href="{% url 'transaction_list' %}">🔙 Volver a la lista</a>
-    <br>
-    <a href="{% url 'home' %}">🏠 Volver al Inicio</a>
-</body>
-</html>
-    {% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">Detalles de la Transacción</h2>
+    </div>
+    <div class="card-body">
+      <h4 class="card-title">{{ transaction.title }}</h4>
+      <p class="card-text">
+        <strong>Monto:</strong> ${{ transaction.amount }}<br>
+        <strong>Categoría:</strong> {{ transaction.category|capfirst }}<br>
+        <strong>Fecha:</strong> {{ transaction.date }}<br>
+        <strong>Descripción:</strong> {{ transaction.description }}
+      </p>
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'delete_transaction' transaction.id %}" class="btn btn-danger">Eliminar Transacción</a>
+        <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Volver a la Lista</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

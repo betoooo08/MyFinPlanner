@@ -1,25 +1,41 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Lista de Transacciones</title>
-</head>
-<body>
-    <h1>Lista de Transacciones</h1>
-    <ul>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Lista de Transacciones</h2>
+    <a href="{% url 'add_transaction' %}" class="btn btn-success">
+      <i class="bi bi-plus-circle"></i> Agregar Transacción
+    </a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Fecha</th>
+          <th>Título</th>
+          <th>Categoría</th>
+          <th>Monto</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
         {% for transaction in transactions %}
-            <li>
-                <a href="{% url 'transaction_detail' transaction.id %}">{{ transaction.title }}</a> - {{ transaction.amount }} - {{ transaction.category }}
-            </li>
+        <tr>
+          <td>{{ transaction.date }}</td>
+          <td>{{ transaction.title }}</td>
+          <td>{{ transaction.category|capfirst }}</td>
+          <td>${{ transaction.amount }}</td>
+          <td>
+            <a href="{% url 'transaction_detail' transaction.id %}" class="btn btn-info btn-sm">Ver Detalles</a>
+          </td>
+        </tr>
         {% empty %}
-            <p>No hay transacciones registradas.</p>
+        <tr>
+          <td colspan="5" class="text-center">No hay transacciones registradas.</td>
+        </tr>
         {% endfor %}
-    </ul>
-    <a href="{% url 'add_transaction' %}">➕ Agregar Transacción</a>
-    <br>
-    <a href="{% url 'home' %}">🏠 Volver al Inicio</a>
-</body>
-</html>
-
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
