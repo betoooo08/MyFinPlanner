@@ -4,7 +4,6 @@ from datetime import timedelta
 import json
 
 def dashboard(request):
-    # Datos de ejemplo para tarjetas y gráficos
     total_balance = 12580.00
     total_income = 4550.00
     total_expenses = 2450.00

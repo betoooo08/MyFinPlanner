@@ -5,9 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}MyFinPlanner{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <!-- CORRECCIÓN: Se usa 'css/style.css' ya que en tu carpeta estático el archivo se llama style.css -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <!-- Especificamos una versión estable de Lucide para evitar conflictos -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.14.0"></script>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
