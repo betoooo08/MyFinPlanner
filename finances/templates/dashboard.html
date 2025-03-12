@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}MyFinPlanner - Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-3xl font-bold tracking-tight">Dashboard</h1>
+    <p class="text-muted-foreground">Welcome back! Here's an overview of your finances.</p>
+  </div>
+
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div class="card">
+      <div class="card-header flex-row items-center justify-between pb-2">
+        <h3 class="card-title text-sm font-medium">Total Balance</h3>
+        <i data-lucide="dollar-sign" class="h-4 w-4 text-muted-foreground"></i>
+      </div>
+      <div class="card-content">
+        <div class="text-2xl font-bold">${{ total_balance|floatformat:2 }}</div>
+        <p class="text-xs text-muted-foreground">+20.1% from last month</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header flex-row items-center justify-between pb-2">
+        <h3 class="card-title text-sm font-medium">Income</h3>
+        <i data-lucide="arrow-up" class="h-4 w-4 text-secondary"></i>
+      </div>
+      <div class="card-content">
+        <div class="text-2xl font-bold">${{ total_income|floatformat:2 }}</div>
+        <p class="text-xs text-muted-foreground">+8.2% from last month</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header flex-row items-center justify-between pb-2">
+        <h3 class="card-title text-sm font-medium">Expenses</h3>
+        <i data-lucide="arrow-down" class="h-4 w-4 text-destructive"></i>
+      </div>
+      <div class="card-content">
+        <div class="text-2xl font-bold">${{ total_expenses|floatformat:2 }}</div>
+        <p class="text-xs text-muted-foreground">-3.1% from last month</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header flex-row items-center justify-between pb-2">
+        <h3 class="card-title text-sm font-medium">Savings</h3>
+        <i data-lucide="wallet" class="h-4 w-4 text-primary"></i>
+      </div>
+      <div class="card-content">
+        <div class="text-2xl font-bold">${{ total_savings|floatformat:2 }}</div>
+        <p class="text-xs text-muted-foreground">+25.8% from last month</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+    <div class="card lg-col-span-4">
+      <div class="card-header">
+        <h3 class="card-title">Income vs Expenses</h3>
+        <p class="card-description">Monthly comparison of your income and expenses</p>
+      </div>
+      <div class="card-content">
+        <div class="chart-container">
+          <canvas id="incomeExpensesChart" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="card lg-col-span-3">
+      <div class="card-header">
+        <h3 class="card-title">Expense Breakdown</h3>
+        <p class="card-description">Where your money is going this month</p>
+      </div>
+      <div class="card-content flex justify-center">
+        <div class="chart-container">
+          <canvas id="expenseBreakdownChart" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+    <div class="card lg-col-span-4">
+      <div class="card-header">
+        <h3 class="card-title">Budget Status</h3>
+        <p class="card-description">Track your spending against your budget</p>
+      </div>
+      <div class="card-content">
+        <div class="space-y-4">
+          {% for budget in budget_data %}
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium">{{ budget.name }}</span>
+              <span class="text-sm text-muted-foreground">${{ budget.spent }} / ${{ budget.budget }}</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar {% if budget.percentage < 50 %}bg-secondary{% elif budget.percentage < 80 %}bg-amber-500{% else %}bg-destructive{% endif %}" style="width: {{ budget.percentage }}%"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card lg-col-span-3">
+      <div class="card-header">
+        <h3 class="card-title">AI Recommendations</h3>
+        <p class="card-description">Personalized insights for your finances</p>
+      </div>
+      <div class="card-content">
+        <div class="space-y-4">
+          {% for recommendation in ai_recommendations %}
+          <div class="alert">
+            <i data-lucide="{{ recommendation.icon }}" class="h-4 w-4"></i>
+            <div class="alert-content">
+              <div class="alert-title">{{ recommendation.title }}</div>
+              <div class="alert-description">
+                {{ recommendation.description }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-6">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Recent Transactions</h3>
+        <p class="card-description">Your latest financial activities</p>
+      </div>
+      <div class="card-content">
+        <div class="tabs">
+          <div class="tabs-list mb-4">
+            <button class="tab active" data-tab="all">All</button>
+            <button class="tab" data-tab="income">Income</button>
+            <button class="tab" data-tab="expenses">Expenses</button>
+          </div>
+          <div class="tab-content active" data-tab-content="all">
+            <div class="space-y-4">
+              {% for transaction in recent_transactions %}
+              <div class="flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                  <div class="rounded-full {{ transaction.bg_class }} p-2">
+                    <i data-lucide="{{ transaction.icon }}" class="h-4 w-4 text-primary"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium">{{ transaction.description }}</p>
+                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, g:i A" }}</p>
+                  </div>
+                </div>
+                <div class="text-sm font-medium {{ transaction.text_class }}">
+                  {% if transaction.type == 'income' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="tab-content" data-tab-content="income">
+            <div class="space-y-4">
+              {% for transaction in recent_transactions %}
+              {% if transaction.type == 'income' %}
+              <div class="flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                  <div class="rounded-full {{ transaction.bg_class }} p-2">
+                    <i data-lucide="{{ transaction.icon }}" class="h-4 w-4 text-secondary"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium">{{ transaction.description }}</p>
+                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, g:i A" }}</p>
+                  </div>
+                </div>
+                <div class="text-sm font-medium {{ transaction.text_class }}">
+                  +${{ transaction.amount|floatformat:2 }}
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="tab-content" data-tab-content="expenses">
+            <div class="space-y-4">
+              {% for transaction in recent_transactions %}
+              {% if transaction.type == 'expense' %}
+              <div class="flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                  <div class="rounded-full {{ transaction.bg_class }} p-2">
+                    <i data-lucide="{{ transaction.icon }}" class="h-4 w-4 text-primary"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium">{{ transaction.description }}</p>
+                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, g:i A" }}</p>
+                  </div>
+                </div>
+                <div class="text-sm font-medium {{ transaction.text_class }}">
+                  -${{ transaction.amount|floatformat:2 }}
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Dashboard specific charts
+  document.addEventListener('DOMContentLoaded', function() {
+    // Income vs Expenses Chart
+    const monthlyData = {{ monthly_data_json|safe }};
+    const incomeExpensesCtx = document.getElementById('incomeExpensesChart').getContext('2d');
+    const incomeExpensesChart = new Chart(incomeExpensesCtx, {
+      type: 'bar',
+      data: {
+        labels: monthlyData.map(item => item.name),
+        datasets: [
+          {
+            label: 'Income',
+            data: monthlyData.map(item => item.income),
+            backgroundColor: '#0ea5e9',
+          },
+          {
+            label: 'Expenses',
+            data: monthlyData.map(item => item.expenses),
+            backgroundColor: '#f43f5e',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Expense Breakdown Chart
+    const categoryData = {{ category_data_json|safe }};
+    const expenseBreakdownCtx = document.getElementById('expenseBreakdownChart').getContext('2d');
+    const expenseBreakdownChart = new Chart(expenseBreakdownCtx, {
+      type: 'doughnut',
+      data: {
+        labels: categoryData.map(item => item.name),
+        datasets: [{
+          data: categoryData.map(item => item.value),
+          backgroundColor: categoryData.map(item => item.color),
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          }
+        }
+      }
+    });
+    
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.tab');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const tabValue = this.getAttribute('data-tab');
+        const tabList = this.closest('.tabs-list');
+        const tabsContainer = this.closest('.tabs');
+        
+        // Update active tab button
+        tabList.querySelectorAll('.tab').forEach(tab => {
+          tab.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        // Update active tab content
+        tabsContainer.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        tabsContainer.querySelector(`.tab-content[data-tab-content="${tabValue}"]`).classList.add('active');
+      });
+    });
+  });
+</script>
+{% endblock %}
