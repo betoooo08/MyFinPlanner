@@ -1,0 +1,12 @@
+# Archivos y carpetas de Python
+*.pyc
+__pycache__/
+
+# Archivos y carpetas de Django
+db.sqlite3
+/staticfiles
+/media
+
+# Entornos virtuales
+env/
+venv/
