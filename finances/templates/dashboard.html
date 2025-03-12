@@ -4,11 +4,13 @@
 
 {% block content %}
 <div class="flex flex-col gap-6">
+  <!-- Encabezado -->
   <div class="flex flex-col gap-2">
     <h1 class="text-3xl font-bold tracking-tight">Dashboard</h1>
     <p class="text-muted-foreground">Welcome back! Here's an overview of your finances.</p>
   </div>
 
+  <!-- Tarjetas de resumen -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
     <div class="card">
       <div class="card-header flex-row items-center justify-between pb-2">
@@ -52,6 +54,7 @@
     </div>
   </div>
 
+  <!-- Gráficos -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
     <div class="card lg-col-span-4">
       <div class="card-header">
@@ -77,6 +80,7 @@
     </div>
   </div>
 
+  <!-- Presupuesto y recomendaciones -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
     <div class="card lg-col-span-4">
       <div class="card-header">
@@ -122,6 +126,7 @@
     </div>
   </div>
 
+  <!-- Transacciones recientes con pestañas -->
   <div class="grid gap-6">
     <div class="card">
       <div class="card-header">
@@ -208,9 +213,8 @@
 
 {% block extra_scripts %}
 <script>
-  // Dashboard specific charts
+  // Dashboard specific charts and tab functionality
   document.addEventListener('DOMContentLoaded', function() {
-    // Income vs Expenses Chart
     const monthlyData = {{ monthly_data_json|safe }};
     const incomeExpensesCtx = document.getElementById('incomeExpensesChart').getContext('2d');
     const incomeExpensesChart = new Chart(incomeExpensesCtx, {
@@ -241,7 +245,6 @@
       }
     });
 
-    // Expense Breakdown Chart
     const categoryData = {{ category_data_json|safe }};
     const expenseBreakdownCtx = document.getElementById('expenseBreakdownChart').getContext('2d');
     const expenseBreakdownChart = new Chart(expenseBreakdownCtx, {
@@ -265,7 +268,6 @@
       }
     });
     
-    // Tab switching functionality
     const tabButtons = document.querySelectorAll('.tab');
     tabButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -273,13 +275,11 @@
         const tabList = this.closest('.tabs-list');
         const tabsContainer = this.closest('.tabs');
         
-        // Update active tab button
         tabList.querySelectorAll('.tab').forEach(tab => {
           tab.classList.remove('active');
         });
         this.classList.add('active');
         
-        // Update active tab content
         tabsContainer.querySelectorAll('.tab-content').forEach(content => {
           content.classList.remove('active');
         });
