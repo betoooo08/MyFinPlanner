@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Budget Form{% endblock %}
+{% load static %}
 {% block content %}
 <div class="container mt-4">
-  <h2>Create/Update Budget</h2>
+  <h2>Sign Up</h2>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save</button>
+    <button type="submit" class="btn btn-primary">Sign Up</button>
   </form>
 </div>
 {% endblock %}

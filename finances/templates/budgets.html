@@ -4,39 +4,44 @@
 {% block title %}Budgets{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-  <h2>Budgets</h2>
-  <a href="{% url 'create_budget' %}" class="btn btn-primary">Create Budget</a>
+<div class="flex flex-col gap-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-2xl font-bold">Budgets</h2>
+    <a href="{% url 'create_budget' %}" class="btn btn-primary">Create Budget</a>
+  </div>
+
+  <div class="card p-4">
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Spent</th>
+          <th>Remaining</th>
+          <th>Percentage</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for budget in budgets %}
+        <tr>
+          <td>{{ budget.category }}</td>
+          <td>${{ budget.amount }}</td>
+          <td>${{ budget.spent }}</td>
+          <td>${{ budget.remaining }}</td>
+          <td>{{ budget.percentage }}%</td>
+          <td>
+            <a href="{% url 'update_budget' budget.pk %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'delete_budget' budget.pk %}" class="btn btn-sm btn-danger">Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center">No budgets available.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-<table class="table table-bordered">
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>Amount</th>
-      <th>Spent</th>
-      <th>Remaining</th>
-      <th>Percentage</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for budget in budgets %}
-    <tr>
-      <td>{{ budget.category }}</td>
-      <td>${{ budget.amount }}</td>
-      <td>${{ budget.spent }}</td>
-      <td>${{ budget.remaining }}</td>
-      <td>{{ budget.percentage }}%</td>
-      <td>
-        <a href="{% url 'update_budget' budget.pk %}" class="btn btn-sm btn-warning">Edit</a>
-        <a href="{% url 'delete_budget' budget.pk %}" class="btn btn-sm btn-danger">Delete</a>
-      </td>
-    </tr>
-    {% empty %}
-    <tr>
-      <td colspan="6" class="text-center">No budgets available.</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
 {% endblock %}

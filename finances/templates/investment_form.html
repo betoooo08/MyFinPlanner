@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
-{% block title %}Budget Form{% endblock %}
+{% block title %}Investment Form{% endblock %}
 {% block content %}
 <div class="container mt-4">
-  <h2>Create/Update Budget</h2>
+  <h2>Add Investment</h2>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Investments{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-2xl font-bold">Investments</h2>
+    <a href="{% url 'create_investment' %}" class="btn btn-primary">Add Investment</a>
+  </div>
+
+  <div class="card p-4">
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Shares</th>
+          <th>Purchase Price</th>
+          <th>Current Price</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in investments %}
+        <tr>
+          <td>{{ inv.symbol }}</td>
+          <td>{{ inv.name }}</td>
+          <td>{{ inv.investment_type }}</td>
+          <td>{{ inv.shares }}</td>
+          <td>${{ inv.purchase_price }}</td>
+          <td>${{ inv.current_price }}</td>
+          <td>${{ inv.value }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center">No investments found. Start by adding one!</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

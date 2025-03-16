@@ -10,9 +10,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-k&33l24mir!g^rpei#+4ig(w*(*k&em#ohuzp2&krk6l%qp-19'
 
@@ -49,13 +46,12 @@ ROOT_URLCONF = 'myFinPlanner.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # Si tienes plantillas globales, colócalas en BASE_DIR/templates
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,  # Busca plantillas en cada app
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',  # Para usar "request" en templates
+                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
@@ -63,6 +59,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 # CORRECCIÓN: Actualiza WSGI para usar el nombre correcto del módulo
 WSGI_APPLICATION = 'myFinPlanner.wsgi.application'
@@ -109,9 +106,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuración de autenticación
-LOGIN_URL = '/login/'
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Configuración de mensajes
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

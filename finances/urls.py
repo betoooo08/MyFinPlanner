@@ -3,15 +3,18 @@ from . import views
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
-    
-    # Transactions
     path('transactions/', views.transaction_list, name='transaction_list'),
     path('transactions/new/', views.create_transaction, name='create_transaction'),
     path('transactions/<int:pk>/delete/', views.delete_transaction, name='delete_transaction'),
-    
-    # Budgets
     path('budgets/', views.budget_list, name='budget_list'),
     path('budgets/new/', views.create_budget, name='create_budget'),
     path('budgets/<int:pk>/edit/', views.update_budget, name='update_budget'),
     path('budgets/<int:pk>/delete/', views.delete_budget, name='delete_budget'),
+    path('investments/', views.investment_list, name='investment_list'),
+    path('investments/new/', views.create_investment, name='create_investment'),
+    path('goals/', views.goal_list, name='goal_list'),
+    path('goals/new/', views.create_goal, name='create_goal'),
+    path('reports/', views.report_list, name='report_list'),
+    path('reports/new/', views.create_report, name='create_report'),
+    path('signup/', views.signup, name='signup'),
 ]
