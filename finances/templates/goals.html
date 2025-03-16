@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Financial Goals{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-2xl font-bold">Goals</h2>
+    <a href="{% url 'create_goal' %}" class="btn btn-primary">Add Goal</a>
+  </div>
+
+  <div class="grid gap-4">
+    {% if goals %}
+      {% for goal in goals %}
+      <div class="card p-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold">{{ goal.name }}</h3>
+          <div>
+            <span class="text-sm">Target: ${{ goal.target_amount }}</span>
+          </div>
+        </div>
+        <p>Current: ${{ goal.current_amount }}</p>
+        <p>Deadline: {{ goal.deadline|date:"M d, Y" }}</p>
+        <div class="progress-container mt-2">
+          <div class="progress-bar {% if goal.percentage < 50 %}bg-secondary{% elif goal.percentage < 80 %}bg-amber-500{% else %}bg-destructive{% endif %}" style="width: {{ goal.percentage }}%"></div>
+        </div>
+        <p class="text-sm mt-2">{{ goal.percentage }}% Complete</p>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p>No goals found. Start by adding one!</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

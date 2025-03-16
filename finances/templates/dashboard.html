@@ -1,16 +1,11 @@
 {% extends 'base.html' %}
-
 {% block title %}MyFinPlanner - Dashboard{% endblock %}
-
 {% block content %}
 <div class="flex flex-col gap-6">
-  <!-- Encabezado -->
   <div class="flex flex-col gap-2">
     <h1 class="text-3xl font-bold tracking-tight">Dashboard</h1>
     <p class="text-muted-foreground">Welcome back! Here's an overview of your finances.</p>
   </div>
-
-  <!-- Tarjetas de resumen -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
     <div class="card">
       <div class="card-header flex-row items-center justify-between pb-2">
@@ -53,8 +48,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Gráficos -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
     <div class="card lg-col-span-4">
       <div class="card-header">
@@ -79,8 +72,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Presupuesto y recomendaciones -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
     <div class="card lg-col-span-4">
       <div class="card-header">
@@ -93,7 +84,7 @@
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-sm font-medium">{{ budget.name }}</span>
-              <span class="text-sm text-muted-foreground">${{ budget.spent }} / ${{ budget.budget }}</span>
+              <span class="text-sm text-muted-foreground">${{ budget.spent|floatformat:2 }} / ${{ budget.budget|floatformat:2 }}</span>
             </div>
             <div class="progress-container">
               <div class="progress-bar {% if budget.percentage < 50 %}bg-secondary{% elif budget.percentage < 80 %}bg-amber-500{% else %}bg-destructive{% endif %}" style="width: {{ budget.percentage }}%"></div>
@@ -115,9 +106,7 @@
             <i data-lucide="{{ recommendation.icon }}" class="h-4 w-4"></i>
             <div class="alert-content">
               <div class="alert-title">{{ recommendation.title }}</div>
-              <div class="alert-description">
-                {{ recommendation.description }}
-              </div>
+              <div class="alert-description">{{ recommendation.description }}</div>
             </div>
           </div>
           {% endfor %}
@@ -125,8 +114,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Transacciones recientes con pestañas -->
   <div class="grid gap-6">
     <div class="card">
       <div class="card-header">
@@ -146,11 +133,11 @@
               <div class="flex items-center justify-between border-b pb-4">
                 <div class="flex items-center gap-4">
                   <div class="rounded-full {{ transaction.bg_class }} p-2">
-                    <i data-lucide="{{ transaction.icon }}" class="h-4 w-4 text-primary"></i>
+                    <i data-lucide="{{ transaction.icon }}" class="h-4 w-4"></i>
                   </div>
                   <div>
                     <p class="text-sm font-medium">{{ transaction.description }}</p>
-                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, g:i A" }}</p>
+                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, Y" }}</p>
                   </div>
                 </div>
                 <div class="text-sm font-medium {{ transaction.text_class }}">
@@ -160,132 +147,49 @@
               {% endfor %}
             </div>
           </div>
-          <div class="tab-content" data-tab-content="income">
-            <div class="space-y-4">
-              {% for transaction in recent_transactions %}
-              {% if transaction.type == 'income' %}
-              <div class="flex items-center justify-between border-b pb-4">
-                <div class="flex items-center gap-4">
-                  <div class="rounded-full {{ transaction.bg_class }} p-2">
-                    <i data-lucide="{{ transaction.icon }}" class="h-4 w-4 text-secondary"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm font-medium">{{ transaction.description }}</p>
-                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, g:i A" }}</p>
-                  </div>
-                </div>
-                <div class="text-sm font-medium {{ transaction.text_class }}">
-                  +${{ transaction.amount|floatformat:2 }}
-                </div>
-              </div>
-              {% endif %}
-              {% endfor %}
-            </div>
-          </div>
-          <div class="tab-content" data-tab-content="expenses">
-            <div class="space-y-4">
-              {% for transaction in recent_transactions %}
-              {% if transaction.type == 'expense' %}
-              <div class="flex items-center justify-between border-b pb-4">
-                <div class="flex items-center gap-4">
-                  <div class="rounded-full {{ transaction.bg_class }} p-2">
-                    <i data-lucide="{{ transaction.icon }}" class="h-4 w-4 text-primary"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm font-medium">{{ transaction.description }}</p>
-                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, g:i A" }}</p>
-                  </div>
-                </div>
-                <div class="text-sm font-medium {{ transaction.text_class }}">
-                  -${{ transaction.amount|floatformat:2 }}
-                </div>
-              </div>
-              {% endif %}
-              {% endfor %}
-            </div>
-          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
-
 {% block extra_scripts %}
 <script>
-  // Dashboard specific charts and tab functionality
-  document.addEventListener('DOMContentLoaded', function() {
-    const monthlyData = {{ monthly_data_json|safe }};
-    const incomeExpensesCtx = document.getElementById('incomeExpensesChart').getContext('2d');
-    const incomeExpensesChart = new Chart(incomeExpensesCtx, {
-      type: 'bar',
-      data: {
-        labels: monthlyData.map(item => item.name),
-        datasets: [
-          {
-            label: 'Income',
-            data: monthlyData.map(item => item.income),
-            backgroundColor: '#0ea5e9',
-          },
-          {
-            label: 'Expenses',
-            data: monthlyData.map(item => item.expenses),
-            backgroundColor: '#f43f5e',
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-
-    const categoryData = {{ category_data_json|safe }};
-    const expenseBreakdownCtx = document.getElementById('expenseBreakdownChart').getContext('2d');
-    const expenseBreakdownChart = new Chart(expenseBreakdownCtx, {
-      type: 'doughnut',
-      data: {
-        labels: categoryData.map(item => item.name),
-        datasets: [{
-          data: categoryData.map(item => item.value),
-          backgroundColor: categoryData.map(item => item.color),
-          hoverOffset: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-          }
-        }
-      }
-    });
-    
-    const tabButtons = document.querySelectorAll('.tab');
-    tabButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const tabValue = this.getAttribute('data-tab');
-        const tabList = this.closest('.tabs-list');
-        const tabsContainer = this.closest('.tabs');
-        
-        tabList.querySelectorAll('.tab').forEach(tab => {
-          tab.classList.remove('active');
-        });
-        this.classList.add('active');
-        
-        tabsContainer.querySelectorAll('.tab-content').forEach(content => {
-          content.classList.remove('active');
-        });
-        tabsContainer.querySelector(`.tab-content[data-tab-content="${tabValue}"]`).classList.add('active');
-      });
+document.addEventListener('DOMContentLoaded', function() {
+  const monthlyData = {{ monthly_data_json|safe }};
+  const incomeExpensesCtx = document.getElementById('incomeExpensesChart').getContext('2d');
+  new Chart(incomeExpensesCtx, {
+    type: 'bar',
+    data: {
+      labels: monthlyData.map(item => item.name),
+      datasets: [
+        { label: 'Income', data: monthlyData.map(item => item.income), backgroundColor: '#0ea5e9' },
+        { label: 'Expenses', data: monthlyData.map(item => item.expenses), backgroundColor: '#f43f5e' }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+  });
+  const categoryData = {{ category_data_json|safe }};
+  const expenseBreakdownCtx = document.getElementById('expenseBreakdownChart').getContext('2d');
+  new Chart(expenseBreakdownCtx, {
+    type: 'doughnut',
+    data: {
+      labels: categoryData.map(item => item.name),
+      datasets: [{ data: categoryData.map(item => item.value), backgroundColor: categoryData.map(item => item.color), hoverOffset: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+  });
+  const tabButtons = document.querySelectorAll('.tab');
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const tabValue = this.getAttribute('data-tab');
+      const tabsContainer = this.closest('.tabs');
+      tabsContainer.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      this.classList.add('active');
+      tabsContainer.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      tabsContainer.querySelector(`.tab-content[data-tab-content="${tabValue}"]`).classList.add('active');
     });
   });
+});
 </script>
 {% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-2xl font-bold">Reports</h2>
+    <a href="{% url 'create_report' %}" class="btn btn-primary">Generate Report</a>
+  </div>
+
+  <div class="card p-4">
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Format</th>
+          <th>Period</th>
+          <th>Created At</th>
+          <th>Download</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+        <tr>
+          <td>{{ report.name }}</td>
+          <td>{{ report.category }}</td>
+          <td>{{ report.format }}</td>
+          <td>{{ report.start_date|date:"M d, Y" }} - {{ report.end_date|date:"M d, Y" }}</td>
+          <td>{{ report.created_at|date:"M d, Y" }}</td>
+          <td>
+            {% if report.file %}
+              <a href="{{ report.file.url }}" class="btn btn-sm btn-primary">Download</a>
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center">No reports available.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
