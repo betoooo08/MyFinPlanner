@@ -68,41 +68,45 @@ class Budget(models.Model):
     
     def __str__(self):
         return f"{self.category.name} Budget: {self.amount}"
+    
 
-class Investment(models.Model):
-    TYPE_CHOICES = [
-        ('stock', 'Stock'),
-        ('etf', 'ETF'),
-        ('bond', 'Bond'),
-        ('crypto', 'Cryptocurrency'),
-        ('reit', 'REIT'),
+class InvestmentSymbol(models.Model):
+    SYMBOL_TYPES = [
+        ('Stock', 'Stock'),
+        ('Crypto', 'Crypto'),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    symbol = models.CharField(max_length=10)
+    symbol = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=100, default='unknown')
+    type = models.CharField(max_length=10, choices=SYMBOL_TYPES)
+
+    def __str__(self):
+        return self.symbol
+
+class Investment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    symbol = models.ForeignKey(InvestmentSymbol, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    investment_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     shares = models.DecimalField(max_digits=10, decimal_places=4)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-    current_price = models.DecimalField(max_digits=10, decimal_places=2)
-    purchase_date = models.DateField()
-    
+    current_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
     @property
     def value(self):
         return self.shares * self.current_price
-    
+
     @property
     def change(self):
         return self.current_price - self.purchase_price
-    
+
     @property
     def change_percent(self):
         if self.purchase_price == 0:
             return 0
         return (self.change / self.purchase_price) * 100
-    
+
     def __str__(self):
-        return f"{self.symbol}: {self.shares} shares"
+        return f"{self.symbol.symbol}: {self.shares} shares"
 
 class Goal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

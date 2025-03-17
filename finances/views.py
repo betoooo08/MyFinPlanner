@@ -7,10 +7,17 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
+from django.conf import settings
 import datetime
 import json
-from .models import Transaction, Budget, Investment, Goal, Report
+import requests
+from .models import Transaction, Budget, Investment, InvestmentSymbol, Goal, Report
 from .forms import TransactionForm, BudgetForm, InvestmentForm, GoalForm, ReportForm
+import finnhub
+from django.http import JsonResponse
+
+# Configurar el cliente de Finnhub
+finnhub_client = finnhub.Client(api_key=settings.FINNHUB_API_KEY)
 
 @login_required
 def dashboard(request):
@@ -174,27 +181,103 @@ def delete_budget(request, pk):
 
 @login_required
 def investment_list(request):
-    investments = Investment.objects.filter(user=request.user)
-    return render(request, 'investments.html', {
-        'investments': investments,
-        'active_page': 'investments'
-    })
+    investments = Investment.objects.all()
+    stock_investments = investments.filter(symbol__type='Stock')
+    crypto_investments = investments.filter(symbol__type='Crypto')
+    total_portfolio_value = sum(investment.value for investment in investments)
 
-@login_required
-def create_investment(request):
+    context = {
+        'investments': investments,
+        'stock_investments': stock_investments,
+        'crypto_investments': crypto_investments,
+        'total_portfolio_value': total_portfolio_value,
+    }
+    return render(request, 'investments.html', context)
+
+def add_investment(request):
     if request.method == 'POST':
         form = InvestmentForm(request.POST)
         if form.is_valid():
             investment = form.save(commit=False)
-            investment.user = request.user
+            if request.user.is_authenticated:
+                investment.user = request.user
+            else:
+                investment.user = None  # O maneja esto de otra manera según tus necesidades
             investment.save()
             return redirect('investment_list')
     else:
         form = InvestmentForm()
-    return render(request, 'investment_form.html', {
-        'form': form,
-        'active_page': 'investments'
-    })
+    return render(request, 'investment_form.html', {'form': form})
+
+@login_required
+def update_symbols(request):
+    FINNHUB_API_KEY = settings.FINNHUB_API_KEY
+
+    # Endpoint para obtener símbolos de acciones
+    stock_url = f"https://finnhub.io/api/v1/stock/symbol?exchange=US&token={FINNHUB_API_KEY}"
+    crypto_url = f"https://finnhub.io/api/v1/crypto/symbol?exchange=binance&token={FINNHUB_API_KEY}"
+
+    try:
+        stock_response = requests.get(stock_url).json()
+        crypto_response = requests.get(crypto_url).json()
+
+        # Guardar símbolos en la base de datos
+        symbols_added = 0
+        
+        for stock in stock_response[:100]:  # Limitar a 100 para no sobrecargar
+            obj, created = InvestmentSymbol.objects.get_or_create(
+                symbol=stock['symbol'],
+                defaults={'type': 'Stock'}
+            )
+            if created:
+                symbols_added += 1
+
+        for crypto in crypto_response[:50]:  # Limitar a 50 para no sobrecargar
+            obj, created = InvestmentSymbol.objects.get_or_create(
+                symbol=crypto['symbol'],
+                defaults={'type': 'Crypto'}
+            )
+            if created:
+                symbols_added += 1
+
+        messages.success(request, f'Successfully updated symbols. Added {symbols_added} new symbols.')
+    except Exception as e:
+        messages.error(request, f'Error updating symbols: {str(e)}')
+
+    return redirect('investment_list')
+
+
+@login_required
+def get_stock_price(symbol):
+    """Obtiene el precio actual de un símbolo desde Finnhub"""
+    try:
+        FINNHUB_API_KEY = settings.FINNHUB_API_KEY
+        url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
+        response = requests.get(url).json()
+        return Decimal(str(response.get("c", 0)))  # "c" es el precio actual
+    except Exception as e:
+        print(f"Error al obtener precio para {symbol}: {e}")
+        return Decimal('0')
+
+
+@login_required
+def symbol_search(request):
+    query = request.GET.get('q', '')
+    if query:
+        data = finnhub_client.symbol_lookup(query)
+        results = [{'symbol': item['symbol'], 'name': item['description']} for item in data.get('result', [])]
+    else:
+        results = []
+    return JsonResponse(results, safe=False)
+
+@login_required
+def get_price(request, symbol):
+    data = finnhub_client.quote(symbol)
+    if 'c' in data:
+        price = data['c']
+        return JsonResponse({'price': price})
+    else:
+        return JsonResponse({'error': 'Symbol not found'}, status=404)
 
 @login_required
 def goal_list(request):
