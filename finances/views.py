@@ -12,6 +12,7 @@ from django.conf import settings
 import datetime
 import json
 import requests
+from decimal import Decimal
 from .models import Transaction, Budget, Investment, InvestmentSymbol, Goal, Report
 from .forms import TransactionForm, BudgetForm, InvestmentForm, GoalForm, ReportForm
 import finnhub
@@ -180,7 +181,7 @@ def delete_budget(request, pk):
         'active_page': 'budgets'
     })
 
-@login_required
+
 def investment_list(request):
     investments = Investment.objects.all()
     stock_investments = investments.filter(symbol__type='Stock')
@@ -198,57 +199,64 @@ def investment_list(request):
 def add_investment(request):
     if request.method == 'POST':
         form = InvestmentForm(request.POST)
+        print("Datos recibidos:", request.POST)
+        
         if form.is_valid():
+            print("Formulario válido")
             investment = form.save(commit=False)
-            if request.user.is_authenticated:
-                investment.user = request.user
-            else:
-                investment.user = None  # O maneja esto de otra manera según tus necesidades
+
+            # Verifica si el símbolo existe
+            investment.symbol, _ = InvestmentSymbol.objects.get_or_create(symbol=form.cleaned_data['symbol'])
+            print("Símbolo asignado:", investment.symbol)
+
             investment.save()
+            print("Inversión guardada correctamente")
             return redirect('investment_list')
+
+        else:
+            print("Errores en el formulario:", form.errors)
+    
     else:
         form = InvestmentForm()
+    
     return render(request, 'investment_form.html', {'form': form})
 
 
 def update_symbols(request):
     FINNHUB_API_KEY = settings.FINNHUB_API_KEY
-
-    # Endpoint para obtener símbolos de acciones
     stock_url = f"https://finnhub.io/api/v1/stock/symbol?exchange=US&token={FINNHUB_API_KEY}"
-    crypto_url = f"https://finnhub.io/api/v1/crypto/symbol?exchange=binance&token={FINNHUB_API_KEY}"
 
     try:
         stock_response = requests.get(stock_url).json()
-        crypto_response = requests.get(crypto_url).json()
+        print(f"Received {len(stock_response)} stock symbols from API.")  # 🚨 DEBUG
 
-        # Guardar símbolos en la base de datos
-        symbols_added = 0
+        symbols_added = []
+        bulk_create_list = []  # Lista para inserción masiva
         
-        for stock in stock_response[:100]:  # Limitar a 100 para no sobrecargar
-            obj, created = InvestmentSymbol.objects.get_or_create(
-                symbol=stock['symbol'],
-                defaults={'type': 'Stock'}
-            )
-            if created:
-                symbols_added += 1
+        for stock in stock_response:
+            if not InvestmentSymbol.objects.filter(symbol=stock['symbol']).exists():
+                bulk_create_list.append(InvestmentSymbol(
+                    symbol=stock['symbol'],
+                    name=stock.get('description', 'Unknown'),
+                    type='Stock'
+                ))
+                symbols_added.append(stock['symbol'])
 
-        for crypto in crypto_response[:50]:  # Limitar a 50 para no sobrecargar
-            obj, created = InvestmentSymbol.objects.get_or_create(
-                symbol=crypto['symbol'],
-                defaults={'type': 'Crypto'}
-            )
-            if created:
-                symbols_added += 1
+        # Guardar en la base de datos con `bulk_create` (mucho más rápido)
+        if bulk_create_list:
+            InvestmentSymbol.objects.bulk_create(bulk_create_list)
 
-        messages.success(request, f'Successfully updated symbols. Added {symbols_added} new symbols.')
+        if symbols_added:
+            messages.success(request, f'Successfully added {len(symbols_added)} new stocks: {", ".join(symbols_added[:50])}...')
+        else:
+            messages.info(request, "No new stocks were added.")
+
     except Exception as e:
         messages.error(request, f'Error updating symbols: {str(e)}')
 
     return redirect('investment_list')
 
 
-@login_required
 def get_stock_price(symbol):
     """Obtiene el precio actual de un símbolo desde Finnhub"""
     try:
@@ -260,8 +268,6 @@ def get_stock_price(symbol):
         print(f"Error al obtener precio para {symbol}: {e}")
         return Decimal('0')
 
-
-@login_required
 def symbol_search(request):
     query = request.GET.get('q', '')
     if query:
@@ -271,7 +277,7 @@ def symbol_search(request):
         results = []
     return JsonResponse(results, safe=False)
 
-@login_required
+
 def get_price(request, symbol):
     data = finnhub_client.quote(symbol)
     if 'c' in data:
