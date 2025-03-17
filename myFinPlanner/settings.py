@@ -115,3 +115,6 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 # Configuración de correo electrónico (para desarrollo)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# API Keys
+FINNHUB_API_KEY = "cvbnah9r01qob7uep660cvbnah9r01qob7uep66g"

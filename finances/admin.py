@@ -47,17 +47,16 @@ class BudgetAdmin(admin.ModelAdmin):
 
 @admin.register(Investment)
 class InvestmentAdmin(admin.ModelAdmin):
-    list_display = ['user', 'symbol', 'name', 'investment_type', 'purchase_price', 'current_price', 'shares', 'value']
-    list_filter = ['investment_type', 'purchase_date']
-    search_fields = ['symbol', 'name']
-    readonly_fields = ['value', 'change', 'change_percent']
+    list_display = ('symbol', 'name', 'purchase_price', 'current_price', 'shares', 'value', 'change_percent')
+    list_filter = ('symbol',)  # Filtra por campos válidos, como 'symbol'
+    search_fields = ('symbol__symbol', 'name')  # Busca por el símbolo o el nombre
+    readonly_fields = ('value', 'change', 'change_percent')  # Campos calculados como solo lectura
     fieldsets = (
         (None, {
-            'fields': ('user', 'symbol', 'name', 'investment_type', 'shares', 'purchase_price', 'current_price', 'purchase_date')
+            'fields': ('user', 'symbol', 'name', 'purchase_price', 'current_price', 'shares')
         }),
-        ('Calculated', {
-            'classes': ('collapse',),
-            'fields': ('value', 'change', 'change_percent'),
+        ('Calculated Fields', {
+            'fields': ('value', 'change', 'change_percent')
         }),
     )
 

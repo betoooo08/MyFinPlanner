@@ -1,46 +1,534 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}Investments{% endblock %}
+{% block title %}MyFinPlanner - Investments{% endblock %}
+
+{% block extra_head %}
+<style>
+  .chart-container {
+    width: 100%;
+    height: 300px;
+    position: relative;
+  }
+  
+  .portfolio-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  
+  .portfolio-item:last-child {
+    border-bottom: none;
+  }
+  
+  .portfolio-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+  }
+  
+  .portfolio-name {
+    display: flex;
+    align-items: center;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="flex flex-col gap-4">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-2xl font-bold">Investments</h2>
-    <a href="{% url 'create_investment' %}" class="btn btn-primary">Add Investment</a>
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-3xl font-bold tracking-tight">Investments</h1>
+    <p class="text-muted-foreground">Track and manage your investment portfolio</p>
   </div>
 
-  <div class="card p-4">
-    <table class="table w-full">
-      <thead>
-        <tr>
-          <th>Symbol</th>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Shares</th>
-          <th>Purchase Price</th>
-          <th>Current Price</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for inv in investments %}
-        <tr>
-          <td>{{ inv.symbol }}</td>
-          <td>{{ inv.name }}</td>
-          <td>{{ inv.investment_type }}</td>
-          <td>{{ inv.shares }}</td>
-          <td>${{ inv.purchase_price }}</td>
-          <td>${{ inv.current_price }}</td>
-          <td>${{ inv.value }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="7" class="text-center">No investments found. Start by adding one!</td>
-        </tr>
+  {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+      <div class="alert-content">
+        <div class="alert-description">{{ message }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div class="card">
+      <div class="card-header flex-row items-center justify-between pb-2">
+        <h3 class="card-title text-sm font-medium">Total Portfolio</h3>
+        <i data-lucide="dollar-sign" class="h-4 w-4 text-muted-foreground"></i>
+      </div>
+      <div class="card-content">
+        <div class="text-2xl font-bold">${{ total_portfolio_value|floatformat:2 }}</div>
+        <p class="text-xs text-secondary">{{ total_portfolio_change }}% overall</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header flex-row items-center justify-between pb-2">
+        <h3 class="card-title text-sm font-medium">Daily Return</h3>
+        <i data-lucide="arrow-up" class="h-4 w-4 text-secondary"></i>
+      </div>
+      <div class="card-content">
+        <div class="text-2xl font-bold">${{ daily_return|floatformat:2 }}</div>
+        <p class="text-xs text-secondary">{{ daily_return_percent }}% today</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header flex-row items-center justify-between pb-2">
+        <h3 class="card-title text-sm font-medium">Total Gain/Loss</h3>
+        <i data-lucide="trending-up" class="h-4 w-4 text-secondary"></i>
+      </div>
+      <div class="card-content">
+        <div class="text-2xl font-bold {% if total_gain >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
+          ${{ total_gain|floatformat:2 }}
+        </div>
+        <p class="text-xs {% if total_gain_percent >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
+          {{ total_gain_percent }}% since purchase
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header flex-row items-center justify-between pb-2">
+        <h3 class="card-title text-sm font-medium">Total Investments</h3>
+        <i data-lucide="briefcase" class="h-4 w-4 text-muted-foreground"></i>
+      </div>
+      <div class="card-content">
+        <div class="text-2xl font-bold">{{ investments|length }}</div>
+        <p class="text-xs text-muted-foreground">Active positions</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+    <div class="card lg-col-span-4">
+      <div class="card-header">
+        <h3 class="card-title">Portfolio Performance</h3>
+        <p class="card-description">Track your investment growth over time</p>
+      </div>
+      <div class="card-content">
+        <div class="chart-container">
+          <canvas id="portfolioPerformanceChart"></canvas>
+        </div>
+      </div>
+      <div class="card-footer flex justify-between">
+        <button class="btn btn-outline btn-sm" id="refresh-data">
+          <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i>
+          Refresh Data
+        </button>
+        <div class="flex gap-2">
+          <button class="btn btn-outline btn-sm chart-type" data-type="bar">
+            <i data-lucide="bar-chart-3" class="mr-2 h-4 w-4"></i>
+            Bar
+          </button>
+          <button class="btn btn-outline btn-sm chart-type active" data-type="line">
+            <i data-lucide="line-chart" class="mr-2 h-4 w-4"></i>
+            Line
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card lg-col-span-3">
+      <div class="card-header">
+        <h3 class="card-title">Asset Allocation</h3>
+        <p class="card-description">Current distribution of your investments</p>
+      </div>
+      <div class="card-content">
+        <div class="chart-container">
+          <canvas id="assetAllocationChart"></canvas>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="w-full space-y-1" id="portfolio-breakdown">
+          <!-- Portfolio breakdown will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header flex-row items-center justify-between">
+      <div>
+        <h3 class="card-title">Investment Holdings</h3>
+        <p class="card-description">Your current investment positions</p>
+      </div>
+      <div class="flex gap-2">
+        <a href="{% url 'update_symbols' %}" class="btn btn-outline">
+          <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i> Update Symbols
+        </a>
+        <a href="{% url 'add_investment' %}" class="btn btn-primary">
+          <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Investment
+        </a>
+      </div>
+    </div>
+    <div class="card-content">
+      <div class="tabs">
+        <div class="tabs-list mb-4">
+          <button class="tab active" data-tab="all">All</button>
+          <button class="tab" data-tab="stocks">Stocks</button>
+          <button class="tab" data-tab="crypto">Crypto</button>
+        </div>
+        <div class="tab-content active" data-tab-content="all">
+          {% if investments %}
+          <div class="rounded-md border">
+            <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
+              <div class="col-span-2">Symbol / Name</div>
+              <div class="text-right">Price</div>
+              <div class="text-right">Change</div>
+              <div class="text-right">Shares</div>
+              <div class="text-right">Value</div>
+            </div>
+            {% for investment in investments %}
+            <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
+              <div class="col-span-2">
+                <div class="font-medium">{{ investment.symbol.symbol }}</div>
+                <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
+              </div>
+              <div class="text-right">${{ investment.current_price|floatformat:2 }}</div>
+              <div class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
+                {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }} 
+                ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
+              </div>
+              <div class="text-right">{{ investment.shares }}</div>
+              <div class="text-right font-medium">${{ investment.value|floatformat:2 }}</div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+            <div class="text-center">
+              <p class="text-sm text-muted-foreground">No investments found in your portfolio</p>
+              <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
+                <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Investment
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        <div class="tab-content" data-tab-content="stocks">
+    {% if stock_investments %}
+    <div class="rounded-md border">
+        <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
+            <div class="col-span-2">Symbol / Name</div>
+            <div class="text-right">Price</div>
+            <div class="text-right">Change</div>
+            <div class="text-right">Shares</div>
+            <div class="text-right">Value</div>
+        </div>
+        {% for investment in stock_investments %}
+        <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
+            <div class="col-span-2">
+                <div class="font-medium">{{ investment.symbol.symbol }}</div>
+                <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
+            </div>
+            <div class="text-right">${{ investment.current_price|floatformat:2 }}</div>
+            <div class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
+                {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }} 
+                ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
+            </div>
+            <div class="text-right">{{ investment.shares }}</div>
+            <div class="text-right font-medium">${{ investment.value|floatformat:2 }}</div>
+        </div>
         {% endfor %}
-      </tbody>
-    </table>
+    </div>
+    {% else %}
+    <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+        <div class="text-center">
+            <p class="text-sm text-muted-foreground">No stocks found in your portfolio</p>
+            <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
+                <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Stock
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="tab-content" data-tab-content="crypto">
+    {% if crypto_investments %}
+    <div class="rounded-md border">
+        <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
+            <div class="col-span-2">Symbol / Name</div>
+            <div class="text-right">Price</div>
+            <div class="text-right">Change</div>
+            <div class="text-right">Shares</div>
+            <div class="text-right">Value</div>
+        </div>
+        {% for investment in crypto_investments %}
+        <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
+            <div class="col-span-2">
+                <div class="font-medium">{{ investment.symbol.symbol }}</div>
+                <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
+            </div>
+            <div class="text-right">${{ investment.current_price|floatformat:2 }}</div>
+            <div class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
+                {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }} 
+                ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
+            </div>
+            <div class="text-right">{{ investment.shares }}</div>
+            <div class="text-right font-medium">${{ investment.value|floatformat:2 }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+        <div class="text-center">
+            <p class="text-sm text-muted-foreground">No cryptocurrencies found in your portfolio</p>
+            <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
+                <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Cryptocurrency
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.tab');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const tabValue = this.getAttribute('data-tab');
+        const tabList = this.closest('.tabs-list');
+        const tabsContainer = this.closest('.tabs');
+        
+        // Update active tab button
+        tabList.querySelectorAll('.tab').forEach(tab => {
+          tab.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        // Update active tab content
+        tabsContainer.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        tabsContainer.querySelector(`.tab-content[data-tab-content="${tabValue}"]`).classList.add('active');
+      });
+    });
+    
+    // Chart type switching
+    const chartTypeButtons = document.querySelectorAll('.chart-type');
+    chartTypeButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        chartTypeButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        
+        const chartType = this.getAttribute('data-type');
+        updateChartType(chartType);
+      });
+    });
+    
+    // Refresh data button
+    const refreshButton = document.getElementById('refresh-data');
+    if (refreshButton) {
+      refreshButton.addEventListener('click', function() {
+        window.location.reload();
+      });
+    }
+    
+    // Portfolio Performance Chart
+    const portfolioCtx = document.getElementById('portfolioPerformanceChart').getContext('2d');
+    let portfolioChart;
+    
+    // Asset Allocation Chart
+    const allocationCtx = document.getElementById('assetAllocationChart').getContext('2d');
+    let allocationChart;
+    
+    // Investment data from Django
+    const investments = JSON.parse('{{ investments_json|escapejs }}');
+
+    
+    // Calculate portfolio data
+    const portfolioData = calculatePortfolioData(investments);
+    const allocationData = calculateAllocationData(investments);
+    
+    // Initialize charts
+    initializeCharts(portfolioData, allocationData);
+    
+    // Update portfolio breakdown
+    updatePortfolioBreakdown(allocationData);
+    
+    function calculatePortfolioData(investments) {
+      // This is a simplified version - in a real app, you would have historical data
+      // For now, we'll create some mock data based on the current investments
+      const today = new Date();
+      const data = [];
+      
+      // Create data points for the last 15 days
+      for (let i = 14; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        
+        // Calculate a value with some random variation
+        const baseValue = parseFloat("{{ total_portfolio_value|default:0 }}");
+        const randomFactor = 0.98 + (Math.random() * 0.04); // Random between 0.98 and 1.02
+        const value = baseValue * (1 - (i * 0.01)) * randomFactor; // Decreasing trend with random noise
+        
+        data.push({
+          date: date.toISOString().split('T')[0],
+          value: value
+        });
+      }
+      
+      return data;
+    }
+    
+    function calculateAllocationData(investments) {
+      // Group investments by type
+      const typeGroups = {};
+      let totalValue = 0;
+      
+      investments.forEach(inv => {
+        const type = inv.symbol_type;
+        const value = parseFloat(inv.value);
+        totalValue += value;
+        
+        if (!typeGroups[type]) {
+          typeGroups[type] = 0;
+        }
+        typeGroups[type] += value;
+      });
+      
+      // Convert to array format for chart
+      const data = [];
+      const colors = {
+        'Stock': '#0088FE',
+        'Crypto': '#00C49F',
+        'ETF': '#FFBB28',
+        'Bond': '#FF8042',
+        'Other': '#8884d8'
+      };
+      
+      Object.keys(typeGroups).forEach(type => {
+        data.push({
+          name: type,
+          value: typeGroups[type],
+          percentage: (typeGroups[type] / totalValue * 100).toFixed(1),
+          color: colors[type] || '#8884d8'
+        });
+      });
+      
+      return data;
+    }
+    
+    function initializeCharts(portfolioData, allocationData) {
+      // Portfolio Performance Chart
+      portfolioChart = new Chart(portfolioCtx, {
+        type: 'line',
+        data: {
+          labels: portfolioData.map(item => item.date),
+          datasets: [{
+            label: 'Portfolio Value',
+            data: portfolioData.map(item => item.value),
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            tension: 0.1,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      });
+      
+      // Asset Allocation Chart
+      allocationChart = new Chart(allocationCtx, {
+        type: 'doughnut',
+        data: {
+          labels: allocationData.map(item => item.name),
+          datasets: [{
+            data: allocationData.map(item => item.value),
+            backgroundColor: allocationData.map(item => item.color),
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const percentage = allocationData[context.dataIndex].percentage;
+                  return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    function updateChartType(type) {
+      if (!portfolioChart) return;
+      
+      portfolioChart.destroy();
+      
+      portfolioChart = new Chart(portfolioCtx, {
+        type: type,
+        data: {
+          labels: portfolioData.map(item => item.date),
+          datasets: [{
+            label: 'Portfolio Value',
+            data: portfolioData.map(item => item.value),
+            borderColor: '#0ea5e9',
+            backgroundColor: type === 'line' ? 'rgba(14, 165, 233, 0.1)' : '#0ea5e9',
+            tension: 0.1,
+            fill: type === 'line'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      });
+    }
+    
+    function updatePortfolioBreakdown(allocationData) {
+      const container = document.getElementById('portfolio-breakdown');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      allocationData.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'portfolio-item';
+        
+        div.innerHTML = `
+          <div class="portfolio-name">
+            <div class="portfolio-color" style="background-color: ${item.color}"></div>
+            <span class="text-sm">${item.name}</span>
+          </div>
+          <span class="text-sm font-medium">$${item.value.toFixed(2)} (${item.percentage}%)</span>
+        `;
+        
+        container.appendChild(div);
+      });
+    }
+  });
+</script>
+{% endblock %}
+

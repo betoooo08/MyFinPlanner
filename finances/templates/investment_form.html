@@ -1,12 +1,139 @@
 {% extends 'base.html' %}
-{% block title %}Investment Form{% endblock %}
+
+{% block title %}MyFinPlanner - Add Investment{% endblock %}
+
+{% block extra_head %}
+<style>
+  .symbol-search-container {
+    position: relative;
+  }
+  
+  .symbol-search-results {
+    position: absolute;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+  
+  .symbol-result-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid hsl(var(--border));
+    cursor: pointer;
+  }
+  
+  .symbol-result-item:hover {
+    background-color: hsl(var(--accent));
+  }
+  
+  .symbol-result-item:last-child {
+    border-bottom: none;
+  }
+  
+  .symbol-code {
+    font-weight: bold;
+    margin-right: 0.5rem;
+  }
+  
+  .symbol-type {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-  <h2>Add Investment</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save</button>
-  </form>
+<div class="flex flex-col gap-6">
+  <div class="card">
+    <div class="card-content">
+      <form method="post" action="{% url 'add_investment' %}" id="investment-form">
+        {% csrf_token %}
+        <div class="symbol-search-container">
+          <label for="id_symbol">Symbol</label>
+          {{ form.symbol }}
+          <div id="symbol-results" class="symbol-search-results"></div>
+        </div>
+        <div>
+          <label for="id_name">Name</label>
+          {{ form.name }}
+        </div>
+        <div>
+          <label for="id_shares">Shares/Units</label>
+          {{ form.shares }}
+        </div>
+        <div>
+          <label for="id_purchase_price">Purchase Price</label>
+          {{ form.purchase_price }}
+        </div>
+        <div>
+          <label for="id_current_price">Current Price</label>
+          {{ form.current_price }}
+        </div>
+      </form>
+    </div>
+    <div class="card-footer flex justify-end gap-2">
+      <a href="{% url 'investment_list' %}" class="btn btn-outline">Cancel</a>
+      <button type="submit" form="investment-form" class="btn btn-primary">Add Investment</button>
+    </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const symbolField = document.getElementById('id_symbol');
+    const nameField = document.getElementById('id_name');
+    const currentPriceField = document.getElementById('id_current_price');
+    const symbolResults = document.getElementById('symbol-results');
+
+    symbolField.addEventListener('input', async function() {
+      const query = this.value.trim();
+      if (query.length < 2) {
+        symbolResults.style.display = 'none';
+        return;
+      }
+
+      const response = await fetch(`/api/symbols/?q=${query}`);
+      const results = await response.json();
+      displaySymbolResults(results);
+    });
+
+    function displaySymbolResults(results) {
+      symbolResults.innerHTML = '';
+      if (results.length === 0) {
+        symbolResults.innerHTML = '<div class="p-4 text-center text-muted-foreground">No symbols found</div>';
+        symbolResults.style.display = 'block';
+        return;
+      }
+      results.forEach(result => {
+        const item = document.createElement('div');
+        item.className = 'symbol-result-item p-2 cursor-pointer hover:bg-gray-100';
+        item.innerHTML = `<span class="symbol-code">${result.symbol}</span> <span>${result.name}</span>`;
+        item.addEventListener('click', async function() {
+          symbolField.value = result.symbol;
+          nameField.value = result.name;
+          const priceResponse = await fetch(`/api/price/${result.symbol}/`);
+          const priceData = await priceResponse.json();
+          currentPriceField.value = priceData.price;
+          symbolResults.style.display = 'none';
+        });
+        symbolResults.appendChild(item);
+      });
+      symbolResults.style.display = 'block';
+    }
+
+    document.addEventListener('click', function(event) {
+      if (!symbolField.contains(event.target) && !symbolResults.contains(event.target)) {
+        symbolResults.style.display = 'none';
+      }
+    });
+  });
+</script>
 {% endblock %}
