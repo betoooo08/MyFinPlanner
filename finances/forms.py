@@ -1,5 +1,5 @@
 from django import forms
-from .models import Transaction, Budget, Investment, Goal, GoalContribution, Report
+from .models import Transaction, Budget, Investment, Goal, GoalContribution, Report, InvestmentSymbol
 
 class TransactionForm(forms.ModelForm):
     class Meta:
@@ -15,12 +15,48 @@ class BudgetForm(forms.ModelForm):
         fields = ['category', 'amount', 'period', 'alert_threshold']
 
 class InvestmentForm(forms.ModelForm):
+    symbol = forms.ModelChoiceField(
+        queryset=InvestmentSymbol.objects.all(),
+        to_field_name='symbol',
+        widget=forms.TextInput(attrs={
+            'class': 'input',
+            'placeholder': 'Enter symbol (e.g. AAPL)',
+            'autocomplete': 'off'
+        })
+    )
+    
     class Meta:
         model = Investment
-        fields = ['symbol', 'name', 'investment_type', 'shares', 'purchase_price', 'current_price', 'purchase_date']
+        fields = ['symbol', 'name', 'shares', 'purchase_price', 'current_price']
         widgets = {
-            'purchase_date': forms.DateInput(attrs={'type': 'date'}),
+            'name': forms.TextInput(attrs={
+                'class': 'input',
+                'placeholder': 'Company or asset name'
+            }),
+            'shares': forms.NumberInput(attrs={
+                'class': 'input',
+                'step': '0.0001',
+                'min': '0.0001',
+                'placeholder': 'Number of shares or units'
+            }),
+            'purchase_price': forms.NumberInput(attrs={
+                'class': 'input',
+                'step': '0.01',
+                'min': '0.01',
+                'placeholder': 'Price per share/unit'
+            }),
+            'current_price': forms.NumberInput(attrs={
+                'class': 'input',
+                'step': '0.01',
+                'min': '0.01',
+                'placeholder': 'Current price per share/unit',
+                'readonly': 'readonly'
+            }),
         }
+    
+    def clean_symbol(self):
+        symbol = self.cleaned_data['symbol']
+        return symbol
 
 class GoalForm(forms.ModelForm):
     class Meta:
