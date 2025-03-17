@@ -2,6 +2,7 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Sum
@@ -209,7 +210,7 @@ def add_investment(request):
         form = InvestmentForm()
     return render(request, 'investment_form.html', {'form': form})
 
-@login_required
+
 def update_symbols(request):
     FINNHUB_API_KEY = settings.FINNHUB_API_KEY
 
