@@ -1,5 +1,3 @@
-# finances/views.py
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
@@ -9,7 +7,7 @@ from django.db.models.functions import TruncMonth
 from django.utils import timezone
 import datetime
 import json
-from .models import Transaction, Budget, Investment, Goal, Report
+from .models import Transaction, Budget, Investment, Goal, Report, Category
 from .forms import TransactionForm, BudgetForm, InvestmentForm, GoalForm, ReportForm
 
 @login_required
@@ -21,13 +19,7 @@ def dashboard(request):
     total_savings = 0
     now = timezone.now()
     start_date = now - datetime.timedelta(days=180)
-    monthly_tx = (
-        transactions.filter(date__gte=start_date)
-        .annotate(month=TruncMonth('date'))
-        .values('month', 'transaction_type')
-        .annotate(total=Sum('amount'))
-        .order_by('month', 'transaction_type')
-    )
+    monthly_tx = transactions.filter(date__gte=start_date).annotate(month=TruncMonth('date')).values('month', 'transaction_type').annotate(total=Sum('amount')).order_by('month', 'transaction_type')
     monthly_dict = {}
     for row in monthly_tx:
         m = row['month'].strftime('%b')
@@ -39,36 +31,19 @@ def dashboard(request):
             monthly_dict[m]['expenses'] = float(row['total'])
     monthly_data = []
     for m in monthly_dict:
-        monthly_data.append({
-            'name': m,
-            'income': monthly_dict[m]['income'],
-            'expenses': monthly_dict[m]['expenses']
-        })
+        monthly_data.append({'name': m, 'income': monthly_dict[m]['income'], 'expenses': monthly_dict[m]['expenses']})
     last_30_days = now - datetime.timedelta(days=30)
-    cat_tx = (
-        transactions.filter(date__gte=last_30_days, transaction_type='expense')
-        .values('category__name')
-        .annotate(value=Sum('amount'))
-    )
+    cat_tx = transactions.filter(date__gte=last_30_days, transaction_type='expense').values('category__name').annotate(value=Sum('amount'))
     color_palette = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#a29bfe', '#fd79a8']
     category_data = []
     idx = 0
     for row in cat_tx:
-        category_data.append({
-            'name': row['category__name'],
-            'value': float(row['value']),
-            'color': color_palette[idx % len(color_palette)]
-        })
+        category_data.append({'name': row['category__name'], 'value': float(row['value']), 'color': color_palette[idx % len(color_palette)]})
         idx += 1
     budgets = Budget.objects.filter(user=request.user)
     budget_data = []
     for b in budgets:
-        budget_data.append({
-            'name': b.category.name,
-            'budget': float(b.amount),
-            'spent': float(b.spent),
-            'percentage': b.percentage
-        })
+        budget_data.append({'name': b.category.name, 'budget': float(b.amount), 'spent': float(b.spent), 'percentage': b.percentage})
     recent_transactions = transactions.order_by('-date')[:5]
     ai_recommendations = []
     context = {
@@ -90,10 +65,7 @@ def dashboard(request):
 @login_required
 def transaction_list(request):
     transactions = Transaction.objects.filter(user=request.user)
-    return render(request, 'transactions.html', {
-        'transactions': transactions,
-        'active_page': 'transactions'
-    })
+    return render(request, 'transactions.html', {'transactions': transactions, 'active_page': 'transaction_list'})
 
 @login_required
 def create_transaction(request):
@@ -106,10 +78,7 @@ def create_transaction(request):
             return redirect('transaction_list')
     else:
         form = TransactionForm()
-    return render(request, 'transaction_form.html', {
-        'form': form,
-        'active_page': 'transactions'
-    })
+    return render(request, 'transaction_form.html', {'form': form, 'active_page': 'transaction_list'})
 
 @login_required
 def delete_transaction(request, pk):
@@ -117,18 +86,12 @@ def delete_transaction(request, pk):
     if request.method == 'POST':
         transaction.delete()
         return redirect('transaction_list')
-    return render(request, 'transaction_confirm_delete.html', {
-        'transaction': transaction,
-        'active_page': 'transactions'
-    })
+    return render(request, 'transaction_confirm_delete.html', {'transaction': transaction, 'active_page': 'transaction_list'})
 
 @login_required
 def budget_list(request):
     budgets = Budget.objects.filter(user=request.user)
-    return render(request, 'budgets.html', {
-        'budgets': budgets,
-        'active_page': 'budgets'
-    })
+    return render(request, 'budgets.html', {'budgets': budgets, 'active_page': 'budget_list'})
 
 @login_required
 def create_budget(request):
@@ -141,10 +104,7 @@ def create_budget(request):
             return redirect('budget_list')
     else:
         form = BudgetForm()
-    return render(request, 'budget_form.html', {
-        'form': form,
-        'active_page': 'budgets'
-    })
+    return render(request, 'budget_form.html', {'form': form, 'active_page': 'budget_list'})
 
 @login_required
 def update_budget(request, pk):
@@ -156,10 +116,7 @@ def update_budget(request, pk):
             return redirect('budget_list')
     else:
         form = BudgetForm(instance=budget)
-    return render(request, 'budget_form.html', {
-        'form': form,
-        'active_page': 'budgets'
-    })
+    return render(request, 'budget_form.html', {'form': form, 'active_page': 'budget_list'})
 
 @login_required
 def delete_budget(request, pk):
@@ -167,18 +124,12 @@ def delete_budget(request, pk):
     if request.method == 'POST':
         budget.delete()
         return redirect('budget_list')
-    return render(request, 'budget_confirm_delete.html', {
-        'budget': budget,
-        'active_page': 'budgets'
-    })
+    return render(request, 'budget_confirm_delete.html', {'budget': budget, 'active_page': 'budget_list'})
 
 @login_required
 def investment_list(request):
     investments = Investment.objects.filter(user=request.user)
-    return render(request, 'investments.html', {
-        'investments': investments,
-        'active_page': 'investments'
-    })
+    return render(request, 'investments.html', {'investments': investments, 'active_page': 'investment_list'})
 
 @login_required
 def create_investment(request):
@@ -191,18 +142,12 @@ def create_investment(request):
             return redirect('investment_list')
     else:
         form = InvestmentForm()
-    return render(request, 'investment_form.html', {
-        'form': form,
-        'active_page': 'investments'
-    })
+    return render(request, 'investment_form.html', {'form': form, 'active_page': 'investment_list'})
 
 @login_required
 def goal_list(request):
     goals = Goal.objects.filter(user=request.user)
-    return render(request, 'goals.html', {
-        'goals': goals,
-        'active_page': 'goals'
-    })
+    return render(request, 'goals.html', {'goals': goals, 'active_page': 'goal_list'})
 
 @login_required
 def create_goal(request):
@@ -215,18 +160,12 @@ def create_goal(request):
             return redirect('goal_list')
     else:
         form = GoalForm()
-    return render(request, 'goal_form.html', {
-        'form': form,
-        'active_page': 'goals'
-    })
+    return render(request, 'goal_form.html', {'form': form, 'active_page': 'goal_list'})
 
 @login_required
 def report_list(request):
     reports = Report.objects.filter(user=request.user)
-    return render(request, 'reports.html', {
-        'reports': reports,
-        'active_page': 'reports'
-    })
+    return render(request, 'reports.html', {'reports': reports, 'active_page': 'report_list'})
 
 @login_required
 def create_report(request):
@@ -239,10 +178,22 @@ def create_report(request):
             return redirect('report_list')
     else:
         form = ReportForm()
-    return render(request, 'report_form.html', {
-        'form': form,
-        'active_page': 'reports'
-    })
+    return render(request, 'report_form.html', {'form': form, 'active_page': 'report_list'})
+
+@login_required
+def budget_insights(request):
+    budgets = Budget.objects.filter(user=request.user)
+    insights = []
+    for b in budgets:
+        insight = {}
+        insight['category'] = b.category.name
+        insight['percentage'] = b.percentage
+        if b.percentage >= 80:
+            insight['message'] = "You've used {}% of your {} budget. Consider reducing spending.".format(b.percentage, b.category.name)
+        else:
+            insight['message'] = "Your {} budget is on track.".format(b.category.name)
+        insights.append(insight)
+    return render(request, 'budget_insights.html', {'insights': insights, 'active_page': 'budget_insights'})
 
 def signup(request):
     if request.method == 'POST':

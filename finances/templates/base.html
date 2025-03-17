@@ -32,13 +32,12 @@
         </button>
         <div class="avatar">
           <div class="avatar-image">
-            <img src="https://via.placeholder.com/40" alt="User" />
+            <img src="https://via.placeholder.com/40" alt="User">
           </div>
           <div class="avatar-fallback">User</div>
         </div>
       </div>
     </header>
-
     <div class="flex flex-1">
       <aside class="mobile-menu">
         <div class="flex flex-col gap-4">
@@ -48,68 +47,53 @@
           </div>
           <nav class="grid gap-2 px-2">
             <a href="{% url 'dashboard' %}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
-              <i data-lucide="home"></i>
-              Dashboard
+              <i data-lucide="home"></i> Dashboard
             </a>
-            <a href="{% url 'transaction_list' %}" class="nav-link {% if active_page == 'transactions' %}active{% endif %}">
-              <i data-lucide="credit-card"></i>
-              Transactions
+            <a href="{% url 'transaction_list' %}" class="nav-link {% if active_page == 'transaction_list' %}active{% endif %}">
+              <i data-lucide="credit-card"></i> Transactions
             </a>
-            <a href="{% url 'budget_list' %}" class="nav-link {% if active_page == 'budgets' %}active{% endif %}">
-              <i data-lucide="wallet"></i>
-              Budgets
+            <a href="{% url 'budget_list' %}" class="nav-link {% if active_page == 'budget_list' %}active{% endif %}">
+              <i data-lucide="wallet"></i> Budgets
             </a>
-            <a href="{% url 'investment_list' %}" class="nav-link {% if active_page == 'investments' %}active{% endif %}">
-              <i data-lucide="dollar-sign"></i>
-              Investments
+            <a href="{% url 'investment_list' %}" class="nav-link {% if active_page == 'investment_list' %}active{% endif %}">
+              <i data-lucide="dollar-sign"></i> Investments
             </a>
-            <a href="{% url 'goal_list' %}" class="nav-link {% if active_page == 'goals' %}active{% endif %}">
-              <i data-lucide="target"></i>
-              Goals
+            <a href="{% url 'goal_list' %}" class="nav-link {% if active_page == 'goal_list' %}active{% endif %}">
+              <i data-lucide="target"></i> Goals
             </a>
-            <a href="{% url 'report_list' %}" class="nav-link {% if active_page == 'reports' %}active{% endif %}">
-              <i data-lucide="file-text"></i>
-              Reports
+            <a href="{% url 'report_list' %}" class="nav-link {% if active_page == 'report_list' %}active{% endif %}">
+              <i data-lucide="file-text"></i> Reports
             </a>
           </nav>
         </div>
       </aside>
-
       <aside class="hidden w-64 border-r bg-muted/40 md:block">
         <nav class="grid gap-2 p-4">
           <a href="{% url 'dashboard' %}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
-            <i data-lucide="home"></i>
-            Dashboard
+            <i data-lucide="home"></i> Dashboard
           </a>
-          <a href="{% url 'transaction_list' %}" class="nav-link {% if active_page == 'transactions' %}active{% endif %}">
-            <i data-lucide="credit-card"></i>
-            Transactions
+          <a href="{% url 'transaction_list' %}" class="nav-link {% if active_page == 'transaction_list' %}active{% endif %}">
+            <i data-lucide="credit-card"></i> Transactions
           </a>
-          <a href="{% url 'budget_list' %}" class="nav-link {% if active_page == 'budgets' %}active{% endif %}">
-            <i data-lucide="wallet"></i>
-            Budgets
+          <a href="{% url 'budget_list' %}" class="nav-link {% if active_page == 'budget_list' %}active{% endif %}">
+            <i data-lucide="wallet"></i> Budgets
           </a>
-          <a href="{% url 'investment_list' %}" class="nav-link {% if active_page == 'investments' %}active{% endif %}">
-            <i data-lucide="dollar-sign"></i>
-            Investments
+          <a href="{% url 'investment_list' %}" class="nav-link {% if active_page == 'investment_list' %}active{% endif %}">
+            <i data-lucide="dollar-sign"></i> Investments
           </a>
-          <a href="{% url 'goal_list' %}" class="nav-link {% if active_page == 'goals' %}active{% endif %}">
-            <i data-lucide="target"></i>
-            Goals
+          <a href="{% url 'goal_list' %}" class="nav-link {% if active_page == 'goal_list' %}active{% endif %}">
+            <i data-lucide="target"></i> Goals
           </a>
-          <a href="{% url 'report_list' %}" class="nav-link {% if active_page == 'reports' %}active{% endif %}">
-            <i data-lucide="file-text"></i>
-            Reports
+          <a href="{% url 'report_list' %}" class="nav-link {% if active_page == 'report_list' %}active{% endif %}">
+            <i data-lucide="file-text"></i> Reports
           </a>
         </nav>
       </aside>
-
       <main class="flex-1 overflow-auto p-4 md:p-6">
         {% block content %}{% endblock %}
       </main>
     </div>
   </div>
-
   <script src="{% static 'js/script.js' %}"></script>
   {% block extra_scripts %}{% endblock %}
 </body>
