@@ -75,11 +75,11 @@
           <label for="id_current_price">Current Price</label>
           {{ form.current_price }}
         </div>
+        <div class="card-footer flex justify-end gap-2">
+          <a href="{% url 'investment_list' %}" class="btn btn-outline">Cancel</a>
+          <button type="submit" form="investment-form" class="btn btn-primary">Add Investment</button>
+        </div>
       </form>
-    </div>
-    <div class="card-footer flex justify-end gap-2">
-      <a href="{% url 'investment_list' %}" class="btn btn-outline">Cancel</a>
-      <button type="submit" form="investment-form" class="btn btn-primary">Add Investment</button>
     </div>
   </div>
 </div>
@@ -137,3 +137,4 @@
   });
 </script>
 {% endblock %}
+

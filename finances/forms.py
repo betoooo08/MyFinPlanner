@@ -15,9 +15,8 @@ class BudgetForm(forms.ModelForm):
         fields = ['category', 'amount', 'period', 'alert_threshold']
 
 class InvestmentForm(forms.ModelForm):
-    symbol = forms.ModelChoiceField(
-        queryset=InvestmentSymbol.objects.all(),
-        to_field_name='symbol',
+    symbol = forms.CharField(
+        max_length=50,
         widget=forms.TextInput(attrs={
             'class': 'input',
             'placeholder': 'Enter symbol (e.g. AAPL)',
@@ -55,8 +54,12 @@ class InvestmentForm(forms.ModelForm):
         }
     
     def clean_symbol(self):
-        symbol = self.cleaned_data['symbol']
-        return symbol
+        symbol = self.cleaned_data['symbol'].upper()
+        try:
+            investment_symbol = InvestmentSymbol.objects.get(symbol=symbol)
+        except InvestmentSymbol.DoesNotExist:
+            raise forms.ValidationError(f"Symbol '{symbol}' does not exist.")
+        return investment_symbol
 
 class GoalForm(forms.ModelForm):
     class Meta:
