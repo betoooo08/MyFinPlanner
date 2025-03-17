@@ -68,6 +68,8 @@ class Budget(models.Model):
     
     def __str__(self):
         return f"{self.category.name} Budget: {self.amount}"
+    
+    
 
 class Investment(models.Model):
     TYPE_CHOICES = [
