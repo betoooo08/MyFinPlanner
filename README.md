@@ -50,23 +50,35 @@ python manage.py runserver
 ```
 
 ### 📁 Estructura del Proyecto
+
 ```bash
-MyFinPlanner/
-│── myfinplanner/        # Carpeta principal del proyecto Django
-│   ├── settings.py      # Configuración del proyecto
-│   ├── urls.py          # Definición de rutas
-│   ├── wsgi.py          # Entrada WSGI para despliegue
-│   ├── asgi.py          # Entrada ASGI (para WebSockets y más)
-│── core/                # Aplicación principal del proyecto
-│   ├── models.py        # Definición de modelos de base de datos
-│   ├── views.py         # Lógica de vistas
-│   ├── urls.py          # Rutas de la app
-│   ├── templates/       # Archivos HTML para el frontend
-│── static/              # Archivos estáticos como CSS y JS
-│── templates/           # Plantillas HTML compartidas
-│── db.sqlite3           # Base de datos SQLite (si se usa por defecto)
-│── manage.py            # Comando principal de Django
-│── requirements.txt     # Dependencias del proyecto
+MyFinPlanner/  
+│── finances/                  # Aplicación principal de Django  
+│   │── static/                 # Archivos estáticos (CSS, JS, imágenes)  
+│   │── templates/              # Plantillas HTML para la interfaz  
+│   │── __init__.py             # Archivo que indica que este directorio es un módulo de Python  
+│   │── admin.py                # Configuración del panel de administración de Django  
+│   │── apps.py                 # Configuración de la aplicación en Django  
+│   │── forms.py                # Formularios para la entrada de datos del usuario  
+│   │── models.py               # Modelos de la base de datos de la aplicación  
+│   │── tests.py                # Pruebas unitarias de la aplicación  
+│   │── urls.py                 # Definición de rutas de la aplicación  
+│   │── views.py                # Lógica de la vista para manejar solicitudes  
+│  
+│── myFinPlanner/               # Configuración global del proyecto Django  
+│   │── __pycache__/            # Archivos compilados de Python (ignorar)  
+│   │── __init__.py             # Archivo que indica que este directorio es un módulo de Python  
+│   │── asgi.py                 # Configuración para el servidor ASGI  
+│   │── settings.py             # Configuración principal del proyecto  
+│   │── urls.py                 # Definición de rutas a nivel del proyecto  
+│   │── wsgi.py                 # Configuración para el servidor WSGI  
+│  
+│── .gitignore                  # Archivos y carpetas que Git debe ignorar  
+│── db.sqlite3                   # Base de datos SQLite del proyecto  
+│── manage.py                    # Archivo para gestionar el proyecto Django  
+│── README.md                    # Documentación del proyecto  
+│── requirements.txt              # Dependencias del proyecto  
+
 ```
 
 ---
