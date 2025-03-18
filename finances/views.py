@@ -187,12 +187,21 @@ def investment_list(request):
     stock_investments = investments.filter(symbol__type='Stock')
     crypto_investments = investments.filter(symbol__type='Crypto')
     total_portfolio_value = sum(investment.value for investment in investments)
+    total_gain = sum(investment.change for investment in investments) 
+    total_gain_percent = round((total_gain / total_portfolio_value) * 100, 2) if total_portfolio_value else 0
+    daily_return = sum((investment.current_price * Decimal(0.01)) * investment.shares for investment in investments)
+    daily_return_percent = round((daily_return / total_portfolio_value) * 100, 2) if total_portfolio_value else 0
 
     context = {
         'investments': investments,
         'stock_investments': stock_investments,
         'crypto_investments': crypto_investments,
         'total_portfolio_value': total_portfolio_value,
+        'total_gain': total_gain,  
+        'total_gain_percent': total_gain_percent,
+        'daily_return': daily_return,
+        'daily_return_percent': daily_return_percent,
+        
     }
     return render(request, 'investments.html', context)
 
@@ -221,7 +230,12 @@ def add_investment(request):
     
     return render(request, 'investment_form.html', {'form': form})
 
-
+def delete_investment(request, pk):
+    investment = get_object_or_404(Investment, pk=pk)
+    if request.method == 'POST':
+        investment.delete()
+        return redirect('investment_list')
+    return render(request, 'investment_confirm_delete.html', {'investment': investment})
 def update_symbols(request):
     FINNHUB_API_KEY = settings.FINNHUB_API_KEY
     stock_url = f"https://finnhub.io/api/v1/stock/symbol?exchange=US&token={FINNHUB_API_KEY}"
@@ -255,6 +269,23 @@ def update_symbols(request):
         messages.error(request, f'Error updating symbols: {str(e)}')
 
     return redirect('investment_list')
+
+def update_price(request):
+    """Actualiza los precios de los investments añadidos por el usuario."""
+    updated_count = 0
+
+    # Filtrar solo los investments que el usuario ha agregado
+    for investment in Investment.objects.all():
+        symbol = investment.symbol
+        new_price = get_stock_price(symbol)
+
+        if new_price > 0:  # Evita actualizar con precios inválidos
+            investment.current_price = new_price
+            investment.save()
+            updated_count += 1
+
+    messages.success(request, f'Successfully updated prices for {updated_count} investments.')
+    return redirect('investment_list')  # Ajusta esto según tu vista de inversiones
 
 
 def get_stock_price(symbol):

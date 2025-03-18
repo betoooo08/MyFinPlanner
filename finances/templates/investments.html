@@ -9,7 +9,7 @@
     height: 300px;
     position: relative;
   }
-  
+
   .portfolio-item {
     display: flex;
     justify-content: space-between;
@@ -17,18 +17,18 @@
     padding: 0.5rem 0;
     border-bottom: 1px solid hsl(var(--border));
   }
-  
+
   .portfolio-item:last-child {
     border-bottom: none;
   }
-  
+
   .portfolio-color {
     width: 12px;
     height: 12px;
     border-radius: 50%;
     margin-right: 0.5rem;
   }
-  
+
   .portfolio-name {
     display: flex;
     align-items: center;
@@ -63,7 +63,7 @@
       </div>
       <div class="card-content">
         <div class="text-2xl font-bold">${{ total_portfolio_value|floatformat:2 }}</div>
-        <p class="text-xs text-secondary">{{ total_portfolio_change }}% overall</p>
+        
       </div>
     </div>
     <div class="card">
@@ -86,7 +86,7 @@
           ${{ total_gain|floatformat:2 }}
         </div>
         <p class="text-xs {% if total_gain_percent >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
-          {{ total_gain_percent }}% since purchase
+          {{ total_gain_percent }}% since last purchase
         </p>
       </div>
     </div>
@@ -156,7 +156,10 @@
       </div>
       <div class="flex gap-2">
         <a href="{% url 'update_symbols' %}" class="btn btn-outline">
-          <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i> Update Symbols
+          <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i> Fetch Latest Stocks
+        </a>
+        <a href="{% url 'update_price' %}" class="btn btn-outline">
+          <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i> Update Prices
         </a>
         <a href="{% url 'add_investment' %}" class="btn btn-primary">
           <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Investment
@@ -187,124 +190,136 @@
                 <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
               </div>
               <div class="text-right">${{ investment.current_price|floatformat:2 }}</div>
-              <div class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
-                {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }} 
+              <div
+                class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
+                {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }}
                 ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
               </div>
               <div class="text-right">{{ investment.shares }}</div>
               <div class="text-right font-medium">${{ investment.value|floatformat:2 }}</div>
+              <div class="text-right">
+                <a href="{% url 'delete_investment' investment.id %}" class="text-red-500 hover:underline"
+                  onclick="return confirm('Are you sure you want to delete this investment?');">
+                  Delete
+                </a>
+              </div>
             </div>
             {% endfor %}
           </div>
-          {% else %}
-          <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
-            <div class="text-center">
-              <p class="text-sm text-muted-foreground">No investments found in your portfolio</p>
-              <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
-                <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Investment
-              </a>
-            </div>
-          </div>
-          {% endif %}
+
+
         </div>
-        <div class="tab-content" data-tab-content="stocks">
-    {% if stock_investments %}
-    <div class="rounded-md border">
-        <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
+        {% else %}
+        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+          <div class="text-center">
+            <p class="text-sm text-muted-foreground">No investments found in your portfolio</p>
+            <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
+              <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Investment
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+
+      </div>
+      <div class="tab-content" data-tab-content="stocks">
+        {% if stock_investments %}
+        <div class="rounded-md border">
+          <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
             <div class="col-span-2">Symbol / Name</div>
             <div class="text-right">Price</div>
             <div class="text-right">Change</div>
             <div class="text-right">Shares</div>
             <div class="text-right">Value</div>
-        </div>
-        {% for investment in stock_investments %}
-        <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
+          </div>
+          {% for investment in stock_investments %}
+          <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
             <div class="col-span-2">
-                <div class="font-medium">{{ investment.symbol.symbol }}</div>
-                <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
+              <div class="font-medium">{{ investment.symbol.symbol }}</div>
+              <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
             </div>
             <div class="text-right">${{ investment.current_price|floatformat:2 }}</div>
             <div class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
-                {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }} 
-                ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
+              {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }}
+              ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
             </div>
             <div class="text-right">{{ investment.shares }}</div>
             <div class="text-right font-medium">${{ investment.value|floatformat:2 }}</div>
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
-        <div class="text-center">
+        {% else %}
+        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+          <div class="text-center">
             <p class="text-sm text-muted-foreground">No stocks found in your portfolio</p>
             <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
-                <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Stock
+              <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Stock
             </a>
+          </div>
         </div>
-    </div>
-    {% endif %}
-</div>
+        {% endif %}
+      </div>
 
-<div class="tab-content" data-tab-content="crypto">
-    {% if crypto_investments %}
-    <div class="rounded-md border">
-        <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
+      <div class="tab-content" data-tab-content="crypto">
+        {% if crypto_investments %}
+        <div class="rounded-md border">
+          <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
             <div class="col-span-2">Symbol / Name</div>
             <div class="text-right">Price</div>
             <div class="text-right">Change</div>
             <div class="text-right">Shares</div>
             <div class="text-right">Value</div>
-        </div>
-        {% for investment in crypto_investments %}
-        <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
+          </div>
+          {% for investment in crypto_investments %}
+          <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
             <div class="col-span-2">
-                <div class="font-medium">{{ investment.symbol.symbol }}</div>
-                <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
+              <div class="font-medium">{{ investment.symbol.symbol }}</div>
+              <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
             </div>
             <div class="text-right">${{ investment.current_price|floatformat:2 }}</div>
             <div class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
-                {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }} 
-                ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
+              {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }}
+              ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
             </div>
             <div class="text-right">{{ investment.shares }}</div>
             <div class="text-right font-medium">${{ investment.value|floatformat:2 }}</div>
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
-        <div class="text-center">
+        {% else %}
+        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+          <div class="text-center">
             <p class="text-sm text-muted-foreground">No cryptocurrencies found in your portfolio</p>
             <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
-                <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Cryptocurrency
+              <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Cryptocurrency
             </a>
+          </div>
         </div>
-    </div>
-    {% endif %}
-</div>
+        {% endif %}
       </div>
     </div>
   </div>
+</div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     // Tab switching functionality
     const tabButtons = document.querySelectorAll('.tab');
     tabButtons.forEach(button => {
-      button.addEventListener('click', function() {
+      button.addEventListener('click', function () {
         const tabValue = this.getAttribute('data-tab');
         const tabList = this.closest('.tabs-list');
         const tabsContainer = this.closest('.tabs');
-        
+
         // Update active tab button
         tabList.querySelectorAll('.tab').forEach(tab => {
           tab.classList.remove('active');
         });
         this.classList.add('active');
-        
+
         // Update active tab content
         tabsContainer.querySelectorAll('.tab-content').forEach(content => {
           content.classList.remove('active');
@@ -312,90 +327,90 @@
         tabsContainer.querySelector(`.tab-content[data-tab-content="${tabValue}"]`).classList.add('active');
       });
     });
-    
+
     // Chart type switching
     const chartTypeButtons = document.querySelectorAll('.chart-type');
     chartTypeButtons.forEach(button => {
-      button.addEventListener('click', function() {
+      button.addEventListener('click', function () {
         chartTypeButtons.forEach(btn => btn.classList.remove('active'));
         this.classList.add('active');
-        
+
         const chartType = this.getAttribute('data-type');
         updateChartType(chartType);
       });
     });
-    
+
     // Refresh data button
     const refreshButton = document.getElementById('refresh-data');
     if (refreshButton) {
-      refreshButton.addEventListener('click', function() {
+      refreshButton.addEventListener('click', function () {
         window.location.reload();
       });
     }
-    
+
     // Portfolio Performance Chart
     const portfolioCtx = document.getElementById('portfolioPerformanceChart').getContext('2d');
     let portfolioChart;
-    
+
     // Asset Allocation Chart
     const allocationCtx = document.getElementById('assetAllocationChart').getContext('2d');
     let allocationChart;
-    
+
     // Investment data from Django
     const investments = JSON.parse('{{ investments_json|escapejs }}');
 
-    
+
     // Calculate portfolio data
     const portfolioData = calculatePortfolioData(investments);
     const allocationData = calculateAllocationData(investments);
-    
+
     // Initialize charts
     initializeCharts(portfolioData, allocationData);
-    
+
     // Update portfolio breakdown
     updatePortfolioBreakdown(allocationData);
-    
+
     function calculatePortfolioData(investments) {
       // This is a simplified version - in a real app, you would have historical data
       // For now, we'll create some mock data based on the current investments
       const today = new Date();
       const data = [];
-      
+
       // Create data points for the last 15 days
       for (let i = 14; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        
+
         // Calculate a value with some random variation
         const baseValue = parseFloat("{{ total_portfolio_value|default:0 }}");
         const randomFactor = 0.98 + (Math.random() * 0.04); // Random between 0.98 and 1.02
         const value = baseValue * (1 - (i * 0.01)) * randomFactor; // Decreasing trend with random noise
-        
+
         data.push({
           date: date.toISOString().split('T')[0],
           value: value
         });
       }
-      
+
       return data;
     }
-    
+
     function calculateAllocationData(investments) {
       // Group investments by type
       const typeGroups = {};
       let totalValue = 0;
-      
+
       investments.forEach(inv => {
         const type = inv.symbol_type;
         const value = parseFloat(inv.value);
         totalValue += value;
-        
+
         if (!typeGroups[type]) {
           typeGroups[type] = 0;
         }
         typeGroups[type] += value;
       });
-      
+
       // Convert to array format for chart
       const data = [];
       const colors = {
@@ -405,7 +420,7 @@
         'Bond': '#FF8042',
         'Other': '#8884d8'
       };
-      
+
       Object.keys(typeGroups).forEach(type => {
         data.push({
           name: type,
@@ -414,10 +429,10 @@
           color: colors[type] || '#8884d8'
         });
       });
-      
+
       return data;
     }
-    
+
     function initializeCharts(portfolioData, allocationData) {
       // Portfolio Performance Chart
       portfolioChart = new Chart(portfolioCtx, {
@@ -443,7 +458,7 @@
           }
         }
       });
-      
+
       // Asset Allocation Chart
       allocationChart = new Chart(allocationCtx, {
         type: 'doughnut',
@@ -464,7 +479,7 @@
             },
             tooltip: {
               callbacks: {
-                label: function(context) {
+                label: function (context) {
                   const label = context.label || '';
                   const value = context.raw || 0;
                   const percentage = allocationData[context.dataIndex].percentage;
@@ -476,12 +491,12 @@
         }
       });
     }
-    
+
     function updateChartType(type) {
       if (!portfolioChart) return;
-      
+
       portfolioChart.destroy();
-      
+
       portfolioChart = new Chart(portfolioCtx, {
         type: type,
         data: {
@@ -506,17 +521,17 @@
         }
       });
     }
-    
+
     function updatePortfolioBreakdown(allocationData) {
       const container = document.getElementById('portfolio-breakdown');
       if (!container) return;
-      
+
       container.innerHTML = '';
-      
+
       allocationData.forEach(item => {
         const div = document.createElement('div');
         div.className = 'portfolio-item';
-        
+
         div.innerHTML = `
           <div class="portfolio-name">
             <div class="portfolio-color" style="background-color: ${item.color}"></div>
@@ -524,11 +539,10 @@
           </div>
           <span class="text-sm font-medium">$${item.value.toFixed(2)} (${item.percentage}%)</span>
         `;
-        
+
         container.appendChild(div);
       });
     }
   });
 </script>
 {% endblock %}
-
