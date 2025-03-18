@@ -28,22 +28,26 @@ Antes de iniciar el proyecto, asegúrate de tener instalado:
 ```bash
 git clone https://github.com/tuusuario/MyFinPlanner.git
 cd MyFinPlanner
+```
 
 ### 3️⃣ Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
+```
 
 ### 4️⃣ Aplicar migraciones y preparar la base de datos
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
+```
 
 ### 5️⃣ Iniciar el servidor de desarrollo
 
 ```bash
 python manage.py runserver
+```
 
 ### 📁 Estructura del Proyecto
 ```bash
@@ -63,6 +67,7 @@ MyFinPlanner/
 │── db.sqlite3           # Base de datos SQLite (si se usa por defecto)
 │── manage.py            # Comando principal de Django
 │── requirements.txt     # Dependencias del proyecto
+```
 
 ---
 
