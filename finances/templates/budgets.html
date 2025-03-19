@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}MyFinPlanner - Budget Management{% endblock %}
+
 {% block content %}
 <div class="flex flex-col gap-6">
   <div class="flex flex-col gap-2">
@@ -78,32 +80,9 @@
     </div>
     {% endfor %}
   </div>
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">Budget Insights</h3>
-      <p class="card-description">AI-powered recommendations for your budgets</p>
-    </div>
-    <div class="card-content space-y-4">
-      {% for insight in budget_insights %}
-      <div class="alert">
-        <i data-lucide="{{ insight.icon }}" class="h-4 w-4"></i>
-        <div class="alert-content">
-          <div class="alert-title">{{ insight.title }}</div>
-          <div class="alert-description">
-            {{ insight.description }}
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="card-footer">
-      <a href="{% url 'budget_insights' %}" class="btn btn-outline w-full">
-        View All Insights <i data-lucide="arrow-right" class="ml-2 h-4 w-4"></i>
-      </a>
-    </div>
-  </div>
 </div>
 {% endblock %}
+
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {

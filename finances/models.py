@@ -31,7 +31,6 @@ class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=255)
-    # Cambiamos el campo category de CharField a ForeignKey
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     transaction_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     date = models.DateField()
@@ -49,12 +48,11 @@ class Budget(models.Model):
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # Cambiamos el campo category de CharField a ForeignKey
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     period = models.CharField(max_length=10, choices=PERIOD_CHOICES, default='monthly')
-    alert_threshold = models.IntegerField(default=80)  # Porcentaje
+    alert_threshold = models.IntegerField(default=80)
     
     @property
     def remaining(self):
@@ -80,14 +78,14 @@ class InvestmentSymbol(models.Model):
     name = models.CharField(max_length=100, default='unknown')
     type = models.CharField(max_length=10, choices=SYMBOL_TYPES)
 
-    def __str__(self):
+    def _str_(self):
         return self.symbol
 
 class Investment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     symbol = models.ForeignKey(InvestmentSymbol, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    shares = models.DecimalField(max_digits=10, decimal_places=4)
+    shares = models.DecimalField(max_digits=10, decimal_places=2)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
@@ -105,7 +103,7 @@ class Investment(models.Model):
             return 0
         return (self.change / self.purchase_price) * 100
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.symbol.symbol}: {self.shares} shares"
 
 class Goal(models.Model):

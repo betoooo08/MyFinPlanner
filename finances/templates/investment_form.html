@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block title %}MyFinPlanner - Add Investment{% endblock %}
 
 {% block extra_head %}
@@ -7,7 +6,6 @@
   .symbol-search-container {
     position: relative;
   }
-  
   .symbol-search-results {
     position: absolute;
     width: 100%;
@@ -20,26 +18,21 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: none;
   }
-  
   .symbol-result-item {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid hsl(var(--border));
     cursor: pointer;
   }
-  
   .symbol-result-item:hover {
     background-color: hsl(var(--accent));
   }
-  
   .symbol-result-item:last-child {
     border-bottom: none;
   }
-  
   .symbol-code {
     font-weight: bold;
     margin-right: 0.5rem;
   }
-  
   .symbol-type {
     color: hsl(var(--muted-foreground));
     font-size: 0.875rem;
@@ -54,25 +47,25 @@
     <div class="card-content">
       <form method="post" action="{% url 'add_investment' %}" id="investment-form">
         {% csrf_token %}
-        <div class="symbol-search-container">
-          <label for="id_symbol">Symbol</label>
+        <div class="mb-4 symbol-search-container">
+          <label for="id_symbol" class="block mb-1 font-medium">Symbol</label>
           {{ form.symbol }}
           <div id="symbol-results" class="symbol-search-results"></div>
         </div>
-        <div>
-          <label for="id_name">Name</label>
+        <div class="mb-4">
+          <label for="id_name" class="block mb-1 font-medium">Name</label>
           {{ form.name }}
         </div>
-        <div>
-          <label for="id_shares">Shares/Units</label>
+        <div class="mb-4">
+          <label for="id_shares" class="block mb-1 font-medium">Shares/Units</label>
           {{ form.shares }}
         </div>
-        <div>
-          <label for="id_purchase_price">Purchase Price</label>
+        <div class="mb-4">
+          <label for="id_purchase_price" class="block mb-1 font-medium">Purchase Price</label>
           {{ form.purchase_price }}
         </div>
-        <div>
-          <label for="id_current_price">Current Price</label>
+        <div class="mb-4">
+          <label for="id_current_price" class="block mb-1 font-medium">Current Price</label>
           {{ form.current_price }}
         </div>
       </form>
@@ -87,53 +80,62 @@
 
 {% block extra_scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const symbolField = document.getElementById('id_symbol');
-    const nameField = document.getElementById('id_name');
-    const currentPriceField = document.getElementById('id_current_price');
-    const symbolResults = document.getElementById('symbol-results');
+document.addEventListener('DOMContentLoaded', function() {
+  const symbolField = document.getElementById('id_symbol');
+  const nameField = document.getElementById('id_name');
+  const currentPriceField = document.getElementById('id_current_price');
+  const symbolResults = document.getElementById('symbol-results');
 
-    symbolField.addEventListener('input', async function() {
-      const query = this.value.trim();
-      if (query.length < 2) {
-        symbolResults.style.display = 'none';
-        return;
-      }
-
+  symbolField.addEventListener('input', async function() {
+    const query = this.value.trim();
+    if (query.length < 2) {
+      symbolResults.style.display = 'none';
+      return;
+    }
+    try {
       const response = await fetch(`/api/symbols/?q=${query}`);
       const results = await response.json();
       displaySymbolResults(results);
-    });
+    } catch (error) {
+      console.error('Error fetching symbol results:', error);
+    }
+  });
 
-    function displaySymbolResults(results) {
-      symbolResults.innerHTML = '';
-      if (results.length === 0) {
-        symbolResults.innerHTML = '<div class="p-4 text-center text-muted-foreground">No symbols found</div>';
-        symbolResults.style.display = 'block';
-        return;
-      }
-      results.forEach(result => {
-        const item = document.createElement('div');
-        item.className = 'symbol-result-item p-2 cursor-pointer hover:bg-gray-100';
-        item.innerHTML = `<span class="symbol-code">${result.symbol}</span> <span>${result.name}</span>`;
-        item.addEventListener('click', async function() {
-          symbolField.value = result.symbol;
-          nameField.value = result.name;
+  function displaySymbolResults(results) {
+    symbolResults.innerHTML = '';
+    if (results.length === 0) {
+      symbolResults.innerHTML = '<div class="p-4 text-center text-muted-foreground">No symbols found</div>';
+      symbolResults.style.display = 'block';
+      return;
+    }
+    results.forEach(result => {
+      const item = document.createElement('div');
+      item.className = 'symbol-result-item';
+      item.innerHTML = `<span class="symbol-code">${result.symbol}</span> <span>${result.name}</span>`;
+      item.addEventListener('click', async function() {
+        symbolField.value = result.symbol;
+        nameField.value = result.name;
+        symbolResults.style.display = 'none';
+        try {
           const priceResponse = await fetch(`/api/price/${result.symbol}/`);
           const priceData = await priceResponse.json();
-          currentPriceField.value = priceData.price;
-          symbolResults.style.display = 'none';
-        });
-        symbolResults.appendChild(item);
+          if (priceData.price !== undefined) {
+            currentPriceField.value = priceData.price;
+          }
+        } catch (error) {
+          console.error('Error fetching price data:', error);
+        }
       });
-      symbolResults.style.display = 'block';
-    }
-
-    document.addEventListener('click', function(event) {
-      if (!symbolField.contains(event.target) && !symbolResults.contains(event.target)) {
-        symbolResults.style.display = 'none';
-      }
+      symbolResults.appendChild(item);
     });
+    symbolResults.style.display = 'block';
+  }
+
+  document.addEventListener('click', function(event) {
+    if (!symbolField.contains(event.target) && !symbolResults.contains(event.target)) {
+      symbolResults.style.display = 'none';
+    }
   });
+});
 </script>
 {% endblock %}
