@@ -89,7 +89,7 @@ class Investment(models.Model):
     name = models.CharField(max_length=100)
     shares = models.DecimalField(max_digits=10, decimal_places=2)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-    current_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    current_price = models.DecimalField(max_digits=10, decimal_places=5, default=0.00)
 
     @property
     def value(self):
