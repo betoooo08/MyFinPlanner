@@ -1,53 +1,83 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}MyFinPlanner - Dashboard{% endblock %}
+
 {% block content %}
 <div class="flex flex-col gap-6">
   <div class="flex flex-col gap-2">
     <h1 class="text-3xl font-bold tracking-tight">Dashboard</h1>
     <p class="text-muted-foreground">Welcome back! Here's an overview of your finances.</p>
   </div>
+
+  <!-- Tarjetas de Balance, Income, Expenses, Savings -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <!-- Total Balance -->
     <div class="card">
       <div class="card-header flex-row items-center justify-between pb-2">
         <h3 class="card-title text-sm font-medium">Total Balance</h3>
         <i data-lucide="dollar-sign" class="h-4 w-4 text-muted-foreground"></i>
       </div>
       <div class="card-content">
-        <div class="text-2xl font-bold">${{ total_balance|floatformat:2 }}</div>
-        <p class="text-xs text-muted-foreground">+20.1% from last month</p>
+        <div class="text-2xl font-bold">
+          ${{ total_balance|floatformat:2 }}
+        </div>
+        <p class="text-xs text-muted-foreground">
+          {% if balance_change_percentage >= 0 %}+{% endif %}{{ balance_change_percentage|floatformat:1 }}% from last month
+        </p>
       </div>
     </div>
+
+    <!-- Income -->
     <div class="card">
       <div class="card-header flex-row items-center justify-between pb-2">
         <h3 class="card-title text-sm font-medium">Income</h3>
         <i data-lucide="arrow-up" class="h-4 w-4 text-secondary"></i>
       </div>
       <div class="card-content">
-        <div class="text-2xl font-bold">${{ total_income|floatformat:2 }}</div>
-        <p class="text-xs text-muted-foreground">+8.2% from last month</p>
+        <div class="text-2xl font-bold">
+          ${{ total_income|floatformat:2 }}
+        </div>
+        <p class="text-xs text-muted-foreground">
+          {% if income_change_percentage >= 0 %}+{% endif %}{{ income_change_percentage|floatformat:1 }}% from last month
+        </p>
       </div>
     </div>
+
+    <!-- Expenses -->
     <div class="card">
       <div class="card-header flex-row items-center justify-between pb-2">
         <h3 class="card-title text-sm font-medium">Expenses</h3>
         <i data-lucide="arrow-down" class="h-4 w-4 text-destructive"></i>
       </div>
       <div class="card-content">
-        <div class="text-2xl font-bold">${{ total_expenses|floatformat:2 }}</div>
-        <p class="text-xs text-muted-foreground">-3.1% from last month</p>
+        <div class="text-2xl font-bold">
+          ${{ total_expenses|floatformat:2 }}
+        </div>
+        <p class="text-xs text-muted-foreground">
+          {% if expenses_change_percentage >= 0 %}+{% endif %}{{ expenses_change_percentage|floatformat:1 }}% from last month
+        </p>
       </div>
     </div>
+
+    <!-- Savings -->
     <div class="card">
       <div class="card-header flex-row items-center justify-between pb-2">
         <h3 class="card-title text-sm font-medium">Savings</h3>
         <i data-lucide="wallet" class="h-4 w-4 text-primary"></i>
       </div>
       <div class="card-content">
-        <div class="text-2xl font-bold">${{ total_savings|floatformat:2 }}</div>
-        <p class="text-xs text-muted-foreground">+25.8% from last month</p>
+        <div class="text-2xl font-bold">
+          ${{ total_savings|floatformat:2 }}
+        </div>
+        <p class="text-xs text-muted-foreground">
+          {% if savings_change_percentage >= 0 %}+{% endif %}{{ savings_change_percentage|floatformat:1 }}% from last month
+        </p>
       </div>
     </div>
   </div>
+
+  <!-- Income vs Expenses & Expense Breakdown -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
     <div class="card lg-col-span-4">
       <div class="card-header">
@@ -72,6 +102,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Budget Status & AI Recommendations -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
     <div class="card lg-col-span-4">
       <div class="card-header">
@@ -84,10 +116,17 @@
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-sm font-medium">{{ budget.name }}</span>
-              <span class="text-sm text-muted-foreground">${{ budget.spent|floatformat:2 }} / ${{ budget.budget|floatformat:2 }}</span>
+              <span class="text-sm text-muted-foreground">
+                ${{ budget.spent|floatformat:2 }} / ${{ budget.budget|floatformat:2 }}
+              </span>
             </div>
             <div class="progress-container">
-              <div class="progress-bar {% if budget.percentage < 50 %}bg-secondary{% elif budget.percentage < 80 %}bg-amber-500{% else %}bg-destructive{% endif %}" style="width: {{ budget.percentage }}%"></div>
+              <div class="progress-bar 
+                {% if budget.percentage < 50 %}bg-secondary
+                {% elif budget.percentage < 80 %}bg-amber-500
+                {% else %}bg-destructive{% endif %}"
+                data-percentage="{{ budget.percentage|default:0 }}">
+              </div>
             </div>
           </div>
           {% endfor %}
@@ -114,6 +153,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Recent Transactions con pestañas -->
   <div class="grid gap-6">
     <div class="card">
       <div class="card-header">
@@ -127,66 +168,179 @@
             <button class="tab" data-tab="income">Income</button>
             <button class="tab" data-tab="expenses">Expenses</button>
           </div>
+          
+          <!-- Tab: All -->
           <div class="tab-content active" data-tab-content="all">
             <div class="space-y-4">
               {% for transaction in recent_transactions %}
               <div class="flex items-center justify-between border-b pb-4">
                 <div class="flex items-center gap-4">
-                  <div class="rounded-full {{ transaction.bg_class }} p-2">
-                    <i data-lucide="{{ transaction.icon }}" class="h-4 w-4"></i>
+                  <!-- Icono flecha verde o roja segun income/expense -->
+                  <div class="rounded-full p-2
+                    {% if transaction.transaction_type == 'income' %}
+                      bg-green-100
+                    {% else %}
+                      bg-red-100
+                    {% endif %}">
+                    <i data-lucide="
+                      {% if transaction.transaction_type == 'income' %}
+                        arrow-up
+                      {% else %}
+                        arrow-down
+                      {% endif %}"
+                      class="h-4 w-4
+                        {% if transaction.transaction_type == 'income' %}
+                          text-green-600
+                        {% else %}
+                          text-red-600
+                        {% endif %}">
+                    </i>
                   </div>
                   <div>
                     <p class="text-sm font-medium">{{ transaction.description }}</p>
                     <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, Y" }}</p>
                   </div>
                 </div>
-                <div class="text-sm font-medium {{ transaction.text_class }}">
-                  {% if transaction.type == 'income' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                <!-- Ingreso en verde, gasto en rojo -->
+                <div class="text-sm font-medium 
+                  {% if transaction.transaction_type == 'income' %}text-green-500
+                  {% else %}text-red-500{% endif %}">
+                  {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}
+                  ${{ transaction.amount|floatformat:2 }}
                 </div>
               </div>
               {% endfor %}
             </div>
           </div>
-        </div>
+
+          <!-- Tab: Income -->
+          <div class="tab-content" data-tab-content="income">
+            <div class="space-y-4">
+              {% for transaction in recent_transactions %}
+              {% if transaction.transaction_type == 'income' %}
+              <div class="flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                  <div class="rounded-full p-2 bg-green-100">
+                    <i data-lucide="arrow-up" class="h-4 w-4 text-green-600"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium">{{ transaction.description }}</p>
+                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, Y" }}</p>
+                  </div>
+                </div>
+                <div class="text-sm font-medium text-green-500">
+                  +${{ transaction.amount|floatformat:2 }}
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Tab: Expenses -->
+          <div class="tab-content" data-tab-content="expenses">
+            <div class="space-y-4">
+              {% for transaction in recent_transactions %}
+              {% if transaction.transaction_type == 'expense' %}
+              <div class="flex items-center justify-between border-b pb-4">
+                <div class="flex items-center gap-4">
+                  <div class="rounded-full p-2 bg-red-100">
+                    <i data-lucide="arrow-down" class="h-4 w-4 text-red-600"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium">{{ transaction.description }}</p>
+                    <p class="text-xs text-muted-foreground">{{ transaction.date|date:"M d, Y" }}</p>
+                  </div>
+                </div>
+                <div class="text-sm font-medium text-red-500">
+                  -${{ transaction.amount|floatformat:2 }}
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+
+        </div> <!-- Fin .tabs -->
       </div>
     </div>
   </div>
+
 </div>
 {% endblock %}
+
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const monthlyData = {{ monthly_data_json|safe }};
+  // Set progress bar widths dynamically
+  document.querySelectorAll('.progress-bar').forEach(bar => {
+    const percentage = bar.getAttribute('data-percentage') || 0;
+    bar.style.width = `${percentage}%`;
+  });
+  // Chart de Income vs Expenses
+  const monthlyData = JSON.parse('{{ monthly_data_json|safe }}');
   const incomeExpensesCtx = document.getElementById('incomeExpensesChart').getContext('2d');
   new Chart(incomeExpensesCtx, {
     type: 'bar',
     data: {
       labels: monthlyData.map(item => item.name),
       datasets: [
-        { label: 'Income', data: monthlyData.map(item => item.income), backgroundColor: '#0ea5e9' },
-        { label: 'Expenses', data: monthlyData.map(item => item.expenses), backgroundColor: '#f43f5e' }
+        {
+          label: 'Income',
+          data: monthlyData.map(item => item.income),
+          backgroundColor: '#0ea5e9',
+        },
+        {
+          label: 'Expenses',
+          data: monthlyData.map(item => item.expenses),
+          backgroundColor: '#f43f5e',
+        },
       ]
     },
-    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
   });
-  const categoryData = {{ category_data_json|safe }};
+
+  // Chart de Expense Breakdown
+  const categoryData = JSON.parse('{{ category_data_json|escapejs }}');
   const expenseBreakdownCtx = document.getElementById('expenseBreakdownChart').getContext('2d');
   new Chart(expenseBreakdownCtx, {
     type: 'doughnut',
     data: {
       labels: categoryData.map(item => item.name),
-      datasets: [{ data: categoryData.map(item => item.value), backgroundColor: categoryData.map(item => item.color), hoverOffset: 4 }]
+      datasets: [{
+        data: categoryData.map(item => item.value),
+        backgroundColor: categoryData.map(item => item.color),
+        hoverOffset: 4
+      }]
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
   });
+
+  // Tabs de transacciones
   const tabButtons = document.querySelectorAll('.tab');
   tabButtons.forEach(button => {
     button.addEventListener('click', function() {
       const tabValue = this.getAttribute('data-tab');
       const tabsContainer = this.closest('.tabs');
+      // Remueve clase 'active' de todos los botones
       tabsContainer.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      // Agrega 'active' solo al botón actual
       this.classList.add('active');
+      // Oculta todo el contenido
       tabsContainer.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      // Muestra el contenido correspondiente
       tabsContainer.querySelector(`.tab-content[data-tab-content="${tabValue}"]`).classList.add('active');
     });
   });
