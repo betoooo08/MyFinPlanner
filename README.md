@@ -52,33 +52,76 @@ python manage.py runserver
 ### 📁 Project Structure
 
 ```bash
-MyFinPlanner/  
-│── finances/                  # Main Django application  
-│   │── static/                 # Static files (CSS, JS, images)  
-│   │── templates/              # HTML templates for the UI  
-│   │── __init__.py             # Marks this directory as a Python module  
-│   │── admin.py                # Django admin panel configuration  
-│   │── apps.py                 # Application configuration in Django  
-│   │── forms.py                # Forms for user data input  
-│   │── models.py               # Database models for the application  
-│   │── tests.py                # Unit tests for the application  
-│   │── urls.py                 # Application-specific URL routing  
-│   │── views.py                # View logic for handling requests  
-│  
-│── myFinPlanner/               # Global project configuration for Django  
-│   │── __pycache__/            # Compiled Python files (ignore)  
-│   │── __init__.py             # Marks this directory as a Python module  
-│   │── asgi.py                 # ASGI server configuration  
-│   │── settings.py             # Main project settings  
-│   │── urls.py                 # Global project URL routing  
-│   │── wsgi.py                 # WSGI server configuration  
-│  
-│── .gitignore                  # Files and folders to be ignored by Git  
-│── db.sqlite3                   # SQLite database file for the project  
-│── manage.py                    # Django management script  
-│── README.md                    # Project documentation  
-│── requirements.txt              # Project dependencies  
+MyFinPlanner/
+├── accounts/                   # Django app for user authentication and management
+│   ├── migrations/             # Migrations for user-related models
+│   ├── static/                 # Static files (CSS, JS, images) specific to the app
+│   ├── templates/              # HTML templates specific to the app
+│   ├── __init__.py             # Marks this directory as a Python module
+│   ├── admin.py                # Admin panel configuration for this app
+│   ├── apps.py                 # Django app configuration
+│   ├── forms.py                # Forms for user input and authentication
+│   ├── models.py               # Models related to user profiles and authentication
+│   ├── tests.py                # Unit tests for the app
+│   ├── urls.py                 # App-specific URL routing
+│   └── views.py                # View logic for handling requests
 
+├── analytics/                  # Django app for data analytics (AI analisis and reports)
+│   ├── migrations/             # Migrations for analytics models
+│   ├── static/                 # Static files specific to the app
+│   ├── templates/              # HTML templates specific to the app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+
+├── finances/                   # Main app for financial management (Budgets, Transactions, Goals)
+│   ├── migrations/             # Database migrations for this app
+│   ├── static/                 # Static files specific to the app
+│   ├── templates/              # HTML templates specific to the app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+
+├── investments/                # Django app for investment management
+│   ├── migrations/             # Migrations for investment-related models
+│   ├── static/                 # Static files specific to the app
+│   ├── templates/              # HTML templates specific to the app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+
+├── myFinPlanner/               # Global project configuration for Django
+│   ├── __pycache__/            # Compiled Python files (ignore in Git)
+│   ├── __init__.py             # Marks this directory as a Python module
+│   ├── asgi.py                 # ASGI server configuration
+│   ├── settings.py             # Main project settings
+│   ├── urls.py                 # Global project URL routing
+│   ├── wsgi.py                 # WSGI server configuration
+
+├── node_modules/               # Frontend dependencies installed by npm
+│   └── ...                     # Contains libraries for frontend (CSS, JS)
+
+├── .gitignore                  # Files and folders ignored by Git
+├── db.sqlite3                  # SQLite database file for the project
+├── manage.py                   # Django management script
+├── package-lock.json           # Dependency lock file for npm
+├── package.json                # npm configuration and dependencies
+├── README.md                   # Project documentation
+└── requirements.txt            # Python dependencies for the project
 
 ```
 
