@@ -24,11 +24,62 @@ finnhub_client = finnhub.Client(api_key=settings.FINNHUB_API_KEY)
 @login_required
 def dashboard(request):
     transactions = Transaction.objects.filter(user=request.user)
+
+    # Totales
     total_income = transactions.filter(transaction_type='income').aggregate(Sum('amount'))['amount__sum'] or 0
     total_expenses = transactions.filter(transaction_type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
     total_balance = total_income - total_expenses
+
+    # Aquí podrías definir la lógica real de "savings"
     total_savings = 0
+
+    # ------------------------------
+    # Variación respecto al mes anterior
+    # ------------------------------
     now = timezone.now()
+    start_of_this_month = now.replace(day=1)
+    end_of_last_month = start_of_this_month - datetime.timedelta(days=1)
+    start_of_last_month = end_of_last_month.replace(day=1)
+
+    this_month_income = transactions.filter(
+        transaction_type='income',
+        date__gte=start_of_this_month
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    last_month_income = transactions.filter(
+        transaction_type='income',
+        date__range=(start_of_last_month, end_of_last_month)
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    if last_month_income != 0:
+        income_change_percentage = ((this_month_income - last_month_income) / last_month_income) * 100
+    else:
+        income_change_percentage = 0
+
+    this_month_expenses = transactions.filter(
+        transaction_type='expense',
+        date__gte=start_of_this_month
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    last_month_expenses = transactions.filter(
+        transaction_type='expense',
+        date__range=(start_of_last_month, end_of_last_month)
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    if last_month_expenses != 0:
+        expenses_change_percentage = ((this_month_expenses - last_month_expenses) / last_month_expenses) * 100
+    else:
+        expenses_change_percentage = 0
+
+    this_month_balance = this_month_income - this_month_expenses
+    last_month_balance = last_month_income - last_month_expenses
+    if last_month_balance != 0:
+        balance_change_percentage = ((this_month_balance - last_month_balance) / last_month_balance) * 100
+    else:
+        balance_change_percentage = 0
+
+    savings_change_percentage = 0
+
     start_date = now - datetime.timedelta(days=180)
     monthly_tx = (
         transactions.filter(date__gte=start_date)
@@ -53,6 +104,7 @@ def dashboard(request):
             'income': monthly_dict[m]['income'],
             'expenses': monthly_dict[m]['expenses']
         })
+
     last_30_days = now - datetime.timedelta(days=30)
     cat_tx = (
         transactions.filter(date__gte=last_30_days, transaction_type='expense')
@@ -69,6 +121,7 @@ def dashboard(request):
             'color': color_palette[idx % len(color_palette)]
         })
         idx += 1
+
     budgets = Budget.objects.filter(user=request.user)
     budget_data = []
     for b in budgets:
@@ -78,13 +131,23 @@ def dashboard(request):
             'spent': float(b.spent),
             'percentage': b.percentage
         })
+
     recent_transactions = transactions.order_by('-date')[:5]
+
+    # Ejemplo de recomendaciones (vacío por ahora)
     ai_recommendations = []
+
     context = {
         'total_balance': total_balance,
         'total_income': total_income,
         'total_expenses': total_expenses,
         'total_savings': total_savings,
+
+        'income_change_percentage': income_change_percentage,
+        'expenses_change_percentage': expenses_change_percentage,
+        'balance_change_percentage': balance_change_percentage,
+        'savings_change_percentage': savings_change_percentage,
+
         'monthly_data': monthly_data,
         'monthly_data_json': json.dumps(monthly_data),
         'category_data': category_data,
@@ -92,6 +155,7 @@ def dashboard(request):
         'budget_data': budget_data,
         'recent_transactions': recent_transactions,
         'ai_recommendations': ai_recommendations,
+
         'active_page': 'dashboard',
     }
     return render(request, 'dashboard.html', context)
@@ -101,7 +165,7 @@ def transaction_list(request):
     transactions = Transaction.objects.filter(user=request.user)
     return render(request, 'transactions.html', {
         'transactions': transactions,
-        'active_page': 'transactions'
+        'active_page': 'transaction_list'
     })
 
 @login_required
@@ -117,7 +181,7 @@ def create_transaction(request):
         form = TransactionForm()
     return render(request, 'transaction_form.html', {
         'form': form,
-        'active_page': 'transactions'
+        'active_page': 'transaction_list'
     })
 
 @login_required
@@ -128,7 +192,7 @@ def delete_transaction(request, pk):
         return redirect('transaction_list')
     return render(request, 'transaction_confirm_delete.html', {
         'transaction': transaction,
-        'active_page': 'transactions'
+        'active_page': 'transaction_list'
     })
 
 @login_required
@@ -136,7 +200,7 @@ def budget_list(request):
     budgets = Budget.objects.filter(user=request.user)
     return render(request, 'budgets.html', {
         'budgets': budgets,
-        'active_page': 'budgets'
+        'active_page': 'budget_list'
     })
 
 @login_required
@@ -152,7 +216,7 @@ def create_budget(request):
         form = BudgetForm()
     return render(request, 'budget_form.html', {
         'form': form,
-        'active_page': 'budgets'
+        'active_page': 'budget_list'
     })
 
 @login_required
@@ -167,7 +231,7 @@ def update_budget(request, pk):
         form = BudgetForm(instance=budget)
     return render(request, 'budget_form.html', {
         'form': form,
-        'active_page': 'budgets'
+        'active_page': 'budget_list'
     })
 
 @login_required
@@ -178,9 +242,8 @@ def delete_budget(request, pk):
         return redirect('budget_list')
     return render(request, 'budget_confirm_delete.html', {
         'budget': budget,
-        'active_page': 'budgets'
+        'active_page': 'budget_list'
     })
-
 
 def investment_list(request):
     investments = Investment.objects.all()

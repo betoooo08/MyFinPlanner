@@ -1,47 +1,101 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Budgets{% endblock %}
+{% block title %}MyFinPlanner - Budget Management{% endblock %}
 
 {% block content %}
-<div class="flex flex-col gap-4">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-2xl font-bold">Budgets</h2>
-    <a href="{% url 'create_budget' %}" class="btn btn-primary">Create Budget</a>
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-3xl font-bold tracking-tight">Budget Management</h1>
+    <p class="text-muted-foreground">Set and track your spending limits across different categories</p>
   </div>
-
-  <div class="card p-4">
-    <table class="table w-full">
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th>Amount</th>
-          <th>Spent</th>
-          <th>Remaining</th>
-          <th>Percentage</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for budget in budgets %}
-        <tr>
-          <td>{{ budget.category }}</td>
-          <td>${{ budget.amount }}</td>
-          <td>${{ budget.spent }}</td>
-          <td>${{ budget.remaining }}</td>
-          <td>{{ budget.percentage }}%</td>
-          <td>
-            <a href="{% url 'update_budget' budget.pk %}" class="btn btn-sm btn-warning">Edit</a>
-            <a href="{% url 'delete_budget' budget.pk %}" class="btn btn-sm btn-danger">Delete</a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="6" class="text-center">No budgets available.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-2">
+      <div class="flex h-2 w-2 rounded-full bg-secondary"></div>
+      <span class="text-sm">Under 50%</span>
+      <div class="flex h-2 w-2 rounded-full bg-amber-500 ml-4"></div>
+      <span class="text-sm">50-80%</span>
+      <div class="flex h-2 w-2 rounded-full bg-destructive ml-4"></div>
+      <span class="text-sm">Over 80%</span>
+    </div>
+    <a href="{% url 'create_budget' %}" class="btn btn-primary w-full sm:w-auto">
+      <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Budget
+    </a>
+  </div>
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="budgets-container">
+    {% for budget in budgets %}
+    <div class="card budget-card" data-budget-id="{{ budget.id }}">
+      <div class="card-header pb-2">
+        <div class="flex items-center justify-between">
+          <h3 class="card-title">{{ budget.category.name }}</h3>
+          <div class="flex items-center gap-2">
+            <a href="{% url 'update_budget' budget.id %}" class="btn btn-ghost btn-icon edit-budget">
+              <i data-lucide="edit" class="h-4 w-4"></i>
+            </a>
+            <a href="{% url 'delete_budget' budget.id %}" class="btn btn-ghost btn-icon delete-budget">
+              <i data-lucide="trash-2" class="h-4 w-4"></i>
+            </a>
+          </div>
+        </div>
+        <p class="card-description">Monthly budget: ${{ budget.amount|floatformat:2 }}</p>
+      </div>
+      <div class="card-content pb-2">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium">${{ budget.spent|floatformat:2 }} spent</span>
+            <span class="text-sm font-medium">${{ budget.remaining|floatformat:2 }} remaining</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar {% if budget.percentage < 50 %}bg-secondary{% elif budget.percentage < 80 %}bg-amber-500{% else %}bg-destructive{% endif %}" style="width: {{ budget.percentage }}%;"></div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-muted-foreground">{{ budget.percentage }}% used</span>
+            {% if budget.percentage >= 80 %}
+            <span class="text-xs font-medium text-destructive">Near limit</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="card-footer pt-0">
+        <button class="btn btn-ghost btn-sm w-full justify-between toggle-transactions">
+          View transactions
+          <i data-lucide="chevron-down" class="h-4 w-4 transition-transform"></i>
+        </button>
+      </div>
+      <div class="transactions-content hidden">
+        <div class="px-6 pb-4 pt-0">
+          {% for transaction in budget.transactions.all %}
+          <div class="flex items-center justify-between border-t pt-2">
+            <div>
+              <p class="text-sm">{{ transaction.description }}</p>
+              <p class="text-xs text-muted-foreground">{{ transaction.date|date:"Y-m-d" }}</p>
+            </div>
+            <span class="text-sm font-medium">${{ transaction.amount|floatformat:2 }}</span>
+          </div>
+          {% empty %}
+          <p class="text-sm">No transactions</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const toggleButtons = document.querySelectorAll('.toggle-transactions');
+  toggleButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const card = this.closest('.budget-card');
+      const content = card.querySelector('.transactions-content');
+      const icon = this.querySelector('i[data-lucide="chevron-down"]');
+      content.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    });
+  });
+});
+</script>
 {% endblock %}
