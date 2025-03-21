@@ -100,7 +100,8 @@
         return;
       }
 
-      const response = await fetch(`/api/symbols/?q=${query}`);
+      // Cambia la URL para incluir el prefijo /investments/
+      const response = await fetch(`/investments/api/symbols/?q=${query}`);
       const results = await response.json();
       displaySymbolResults(results);
     });
@@ -119,7 +120,9 @@
         item.addEventListener('click', async function() {
           symbolField.value = result.symbol;
           nameField.value = result.name;
-          const priceResponse = await fetch(`/api/price/${result.symbol}/`);
+
+          // Cambia la URL para incluir el prefijo /investments/
+          const priceResponse = await fetch(`/investments/api/price/${result.symbol}/`);
           const priceData = await priceResponse.json();
           currentPriceField.value = priceData.price;
           symbolResults.style.display = 'none';

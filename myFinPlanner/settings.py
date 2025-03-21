@@ -28,6 +28,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'finances.apps.FinancesConfig',
+    'investments.apps.InvestmentsConfig',
+    'accounts.apps.AccountsConfig',
+    'analytics.apps.AnalyticsConfig',
+    
 ]
 
 MIDDLEWARE = [
