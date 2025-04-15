@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MyFinPlanner - Smart Financial Planning{% endblock %}</title>
+    
+    <!-- Tailwind CSS desde CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* RESET Y ESTILOS BASE */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.5;
+            color: #333;
+        }
+        
+        /* LAYOUT */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .min-h-screen {
+            min-height: 100vh;
+        }
+        
+        .flex-1 {
+            flex: 1 1 0%;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-center {
+            justify-content: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .gap-3 {
+            gap: 0.75rem;
+        }
+        
+        .gap-4 {
+            gap: 1rem;
+        }
+        
+        .gap-6 {
+            gap: 1.5rem;
+        }
+        
+        .gap-8 {
+            gap: 2rem;
+        }
+        
+        .gap-12 {
+            gap: 3rem;
+        }
+        
+        .gap-16 {
+            gap: 4rem;
+        }
+        
+        .grid {
+            display: grid;
+        }
+        
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        
+        .grid-cols-6 {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+        
+        .col-span-2 {
+            grid-column: span 2 / span 2;
+        }
+        
+        /* SPACING */
+        .p-4 {
+            padding: 1rem;
+        }
+        
+        .p-8 {
+            padding: 2rem;
+        }
+        
+        .px-3 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        .py-1 {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+        
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        .py-6 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        
+        .py-12 {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+        
+        .py-20 {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+        
+        .pt-8 {
+            padding-top: 2rem;
+        }
+        
+        .pb-2 {
+            padding-bottom: 0.5rem;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+        
+        .mb-16 {
+            margin-bottom: 4rem;
+        }
+        
+        .mr-2 {
+            margin-right: 0.5rem;
+        }
+        
+        .mr-4 {
+            margin-right: 1rem;
+        }
+        
+        .ml-2 {
+            margin-left: 0.5rem;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .mt-4 {
+            margin-top: 1rem;
+        }
+        
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+        
+        .mt-12 {
+            margin-top: 3rem;
+        }
+        
+        .space-y-2 > * + * {
+            margin-top: 0.5rem;
+        }
+        
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+        
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+        
+        .space-y-8 > * + * {
+            margin-top: 2rem;
+        }
+        
+        .space-x-2 > * + * {
+            margin-left: 0.5rem;
+        }
+        
+        /* TYPOGRAPHY */
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .text-base {
+            font-size: 1rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+        }
+        
+        .text-xl {
+            font-size: 1.25rem;
+        }
+        
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        
+        .text-3xl {
+            font-size: 1.875rem;
+        }
+        
+        .text-4xl {
+            font-size: 2.25rem;
+        }
+        
+        .text-5xl {
+            font-size: 3rem;
+        }
+        
+        .font-normal {
+            font-weight: 400;
+        }
+        
+        .font-medium {
+            font-weight: 500;
+        }
+        
+        .font-semibold {
+            font-weight: 600;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .leading-tight {
+            line-height: 1.25;
+        }
+        
+        .leading-relaxed {
+            line-height: 1.625;
+        }
+        
+        .tracking-tight {
+            letter-spacing: -0.025em;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-white {
+            color: #ffffff;
+        }
+        
+        .text-gray-300 {
+            color: #d1d5db;
+        }
+        
+        .text-gray-400 {
+            color: #9ca3af;
+        }
+        
+        .text-gray-500 {
+            color: #6b7280;
+        }
+        
+        .text-gray-600 {
+            color: #4b5563;
+        }
+        
+        .text-gray-700 {
+            color: #374151;
+        }
+        
+        .text-blue-100 {
+            color: #dbeafe;
+        }
+        
+        .text-blue-600 {
+            color: #2563eb;
+        }
+        
+        .text-green-600 {
+            color: #16a34a;
+        }
+        
+        .text-yellow-400 {
+            color: #facc15;
+        }
+        
+        .text-red-500 {
+            color: #ef4444;
+        }
+        
+        .text-secondary {
+            color: #10b981;
+        }
+        
+        .text-destructive {
+            color: #ef4444;
+        }
+        
+        .text-muted-foreground {
+            color: #6b7280;
+        }
+        
+        .italic {
+            font-style: italic;
+        }
+        
+        /* BACKGROUNDS */
+        .bg-white {
+            background-color: #ffffff;
+        }
+        
+        .bg-gray-50 {
+            background-color: #f9fafb;
+        }
+        
+        .bg-gray-800 {
+            background-color: #1f2937;
+        }
+        
+        .bg-blue-100 {
+            background-color: #dbeafe;
+        }
+        
+        .bg-blue-500 {
+            background-color: #3b82f6;
+        }
+        
+        .bg-blue-600 {
+            background-color: #2563eb;
+        }
+        
+        .bg-green-100 {
+            background-color: #dcfce7;
+        }
+        
+        .bg-purple-100 {
+            background-color: #f3e8ff;
+        }
+        
+        .bg-yellow-100 {
+            background-color: #fef9c3;
+        }
+        
+        .bg-indigo-100 {
+            background-color: #e0e7ff;
+        }
+        
+        .bg-teal-100 {
+            background-color: #ccfbf1;
+        }
+        
+        .bg-red-100 {
+            background-color: #fee2e2;
+        }
+        
+        .bg-green-100 {
+            background-color: #d1fae5;
+        }
+        
+        .bg-gradient-blue {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+        }
+        
+        /* BORDERS */
+        .border {
+            border-width: 1px;
+            border-style: solid;
+        }
+        
+        .border-b {
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+        }
+        
+        .border-t {
+            border-top-width: 1px;
+            border-top-style: solid;
+        }
+        
+        .border-gray-100 {
+            border-color: #f3f4f6;
+        }
+        
+        .border-gray-200 {
+            border-color: #e5e7eb;
+        }
+        
+        .border-gray-300 {
+            border-color: #d1d5db;
+        }
+        
+        .border-gray-700 {
+            border-color: #374151;
+        }
+        
+        .border-white {
+            border-color: #ffffff;
+        }
+        
+        .border-dashed {
+            border-style: dashed;
+        }
+        
+        .rounded-md {
+            border-radius: 0.375rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .rounded-full {
+            border-radius: 9999px;
+        }
+        
+        /* EFFECTS */
+        .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .shadow-xl {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .opacity-20 {
+            opacity: 0.2;
+        }
+        
+        /* POSITIONING */
+        .relative {
+            position: relative;
+        }
+        
+        .absolute {
+            position: absolute;
+        }
+        
+        .-top-6 {
+            top: -1.5rem;
+        }
+        
+        .-left-6 {
+            left: -1.5rem;
+        }
+        
+        /* SIZING */
+        .w-4 {
+            width: 1rem;
+        }
+        
+        .w-8 {
+            width: 2rem;
+        }
+        
+        .w-10 {
+            width: 2.5rem;
+        }
+        
+        .w-12 {
+            width: 3rem;
+        }
+        
+        .w-64 {
+            width: 16rem;
+        }
+        
+        .w-full {
+            width: 100%;
+        }
+        
+        .h-4 {
+            height: 1rem;
+        }
+        
+        .h-8 {
+            height: 2rem;
+        }
+        
+        .h-10 {
+            height: 2.5rem;
+        }
+        
+        .h-12 {
+            height: 3rem;
+        }
+        
+        .h-64 {
+            height: 16rem;
+        }
+        
+        .h-auto {
+            height: auto;
+        }
+        
+        .h-\[200px\] {
+            height: 200px;
+        }
+        
+        .max-w-md {
+            max-width: 28rem;
+        }
+        
+        .max-w-2xl {
+            max-width: 42rem;
+        }
+        
+        /* FLEXBOX & GRID */
+        .inline-flex {
+            display: inline-flex;
+        }
+        
+        .flex-row {
+            flex-direction: row;
+        }
+        
+        .inline-block {
+            display: inline-block;
+        }
+        
+        /* INTERACTIVITY */
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        
+        /* TRANSITIONS */
+        .transition-colors {
+            transition-property: color, background-color, border-color;
+            transition-duration: 200ms;
+        }
+        
+        .transition-all {
+            transition-property: all;
+            transition-duration: 200ms;
+        }
+        
+        /* HOVER STATES */
+        .hover\:bg-blue-700:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .hover\:bg-blue-50:hover {
+            background-color: #eff6ff;
+        }
+        
+        .hover\:bg-gray-50:hover {
+            background-color: #f9fafb;
+        }
+        
+        .hover\:text-blue-600:hover {
+            color: #2563eb;
+        }
+        
+        .hover\:text-white:hover {
+            color: #ffffff;
+        }
+        
+        .hover\:underline:hover {
+            text-decoration: underline;
+        }
+        
+        .hover\:shadow-md:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* CUSTOM COMPONENTS */
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .card-content {
+            padding: 1.25rem;
+        }
+        
+        .card-footer {
+            padding: 1.25rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+        
+        .card-description {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition-property: color, background-color, border-color, box-shadow;
+            transition-duration: 200ms;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #d1d5db;
+            color: #374151;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .alert {
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        /* TABS */
+        .tabs-list {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1rem 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* CHARTS */
+        .chart-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .portfolio-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .portfolio-item:last-child {
+            border-bottom: none;
+        }
+        
+        .portfolio-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .portfolio-name {
+            display: flex;
+            align-items: center;
+        }
+        
+        .chart-card {
+            padding: 20px;
+            height: 100%;
+        }
+        
+        .chart-card .card-content {
+            padding: 20px;
+            height: calc(100% - 80px);
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* RESPONSIVE */
+        @media (min-width: 768px) {
+            .md\:flex {
+                display: flex;
+            }
+            
+            .md\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            
+            .md\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+            
+            .md\:grid-cols-4 {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+            
+            .md\:text-5xl {
+                font-size: 3rem;
+            }
+            
+            .md\:block {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+            
+            .lg\:grid-cols-4 {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+            
+            .lg\:grid-cols-7 {
+                grid-template-columns: repeat(7, minmax(0, 1fr));
+            }
+            
+            .lg\:col-span-3 {
+                grid-column: span 3 / span 3;
+            }
+            
+            .lg\:col-span-4 {
+                grid-column: span 4 / span 4;
+            }
+            
+            .lg\:col-span-7 {
+                grid-column: span 7 / span 7;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        
+        /* UTILITIES */
+        .hidden {
+            display: none;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        .overflow-hidden {
+            overflow: hidden;
+        }
+        
+        .last\:border-0:last-child {
+            border-width: 0;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="flex flex-col min-h-screen">
+    <!-- Header/Navigation -->
+    <header class="border-b bg-white">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <span class="text-xl font-bold text-blue-600">MyFinPlanner</span>
+            </div>
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+                <a href="#about" class="text-gray-600 hover:text-blue-600 transition-colors">About Us</a>
+                <a href="#testimonials" class="text-gray-600 hover:text-blue-600 transition-colors">Testimonials</a>
+                <a href="#pricing" class="text-gray-600 hover:text-blue-600 transition-colors">Pricing</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'login' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Log In</a>
+                <a href="{% url 'signup' %}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                            <i class="fas fa-wallet text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold text-white">MyFinPlanner</span>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        Your personal finance companion for a secure financial future.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Testimonials</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-12 pt-8 text-sm text-center text-gray-400">
+                <p>&copy; {% now "Y" %} MyFinPlanner. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <script>
+        // Manejo de pestañas
+        document.addEventListener("DOMContentLoaded", () => {
+            // Inicializar pestañas
+            const tabs = document.querySelectorAll(".tab");
+            const tabContents = document.querySelectorAll("[data-tab-content]");
+            
+            tabs.forEach((tab) => {
+                tab.addEventListener("click", () => {
+                    const target = tab.dataset.tab;
+                    
+                    // Desactivar todas las pestañas
+                    tabs.forEach((t) => t.classList.remove("active"));
+                    tabContents.forEach((content) => content.classList.remove("active"));
+                    
+                    // Activar la pestaña seleccionada
+                    tab.classList.add("active");
+                    const targetContent = document.querySelector([data-tab-content="${target}"]);
+                    if (targetContent) {
+                        targetContent.classList.add("active");
+                    }
+                });
+            });
+            
+            // Inicializar tooltips
+            const tooltips = document.querySelectorAll("[data-tooltip]");
+            tooltips.forEach((tooltip) => {
+                tooltip.addEventListener("mouseenter", () => {
+                    const tooltipText = tooltip.dataset.tooltip;
+                    const tooltipEl = document.createElement("div");
+                    tooltipEl.className = "tooltip";
+                    tooltipEl.textContent = tooltipText;
+                    document.body.appendChild(tooltipEl);
+                    
+                    const rect = tooltip.getBoundingClientRect();
+                    tooltipEl.style.top = ${rect.top - tooltipEl.offsetHeight - 10}px;
+                    tooltipEl.style.left = ${rect.left + (rect.width / 2) - tooltipEl.offsetWidth / 2}px;
+                    tooltipEl.style.opacity = "1";
+                });
+                
+                tooltip.addEventListener("mouseleave", () => {
+                    const tooltipEl = document.querySelector(".tooltip");
+                    if (tooltipEl) {
+                        tooltipEl.remove();
+                    }
+                });
+            });
+            
+            // Inicializar iconos de Lucide (alternativa a Font Awesome)
+            const lucideIcons = document.querySelectorAll("[data-lucide]");
+            lucideIcons.forEach((icon) => {
+                const iconName = icon.getAttribute("data-lucide");
+                // Crear un icono de Font Awesome como alternativa
+                icon.innerHTML = <i class="fas fa-${getIconEquivalent(iconName)}"></i>;
+            });
+            
+            // Función para convertir nombres de iconos de Lucide a Font Awesome
+            function getIconEquivalent(iconName) {
+                const iconMap = {
+                    "dollar-sign": "dollar-sign",
+                    "arrow-up": "arrow-up",
+                    "trending-up": "chart-line",
+                    "briefcase": "briefcase",
+                    "refresh-cw": "sync",
+                    "plus": "plus"
+                };
+                
+                return iconMap[iconName] || "circle"; // Círculo como fallback
+            }
+        });
+        
+        // Función para generar colores aleatorios pero consistentes
+        function generateColors(count) {
+            const colors = [
+                "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
+                "#FF9F40", "#8AC249", "#EA5F89", "#00D8B6", "#FFB7B2"
+            ];
+            
+            // Si necesitamos más colores de los predefinidos, generamos más
+            if (count > colors.length) {
+                for (let i = colors.length; i < count; i++) {
+                    const r = Math.floor(Math.random() * 255);
+                    const g = Math.floor(Math.random() * 255);
+                    const b = Math.floor(Math.random() * 255);
+                    colors.push(rgb(${r}, ${g}, ${b}));
+                }
+            }
+            
+            return colors.slice(0, count);
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

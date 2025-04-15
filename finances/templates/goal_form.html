@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'shared_base.html' %}
 {% block title %}Goal Form{% endblock %}
 {% block content %}
 <div class="container mt-4">
-  <h2>Add Goal</h2>
+  <h2>Add/Edit Goal</h2>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

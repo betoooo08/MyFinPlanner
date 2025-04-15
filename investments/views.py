@@ -10,33 +10,84 @@ import finnhub
 from django.http import JsonResponse
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
+from datetime import datetime, timedelta
+import random
+import json
 
 # Create your views here.
 # Configurar el cliente de Finnhub
 finnhub_client = finnhub.Client(api_key=settings.FINNHUB_API_KEY)
 
 def investment_list(request):
-    investments = Investment.objects.all()
-    stock_investments = investments.filter(symbol__type='Stock')
-    crypto_investments = investments.filter(symbol__type='Crypto')
+    investments = Investment.objects.filter(user=request.user) #Filtrar por usuario
+
+    # Calcular el valor total del portafolio
     total_portfolio_value = sum(investment.value for investment in investments)
-    total_gain = sum(investment.change for investment in investments) 
+
+    # Calcular la ganancia/pérdida total
+    total_gain = sum(investment.change for investment in investments)
     total_gain_percent = round((total_gain / total_portfolio_value) * 100, 2) if total_portfolio_value else 0
+
+    # Calcular el retorno diario
     daily_return = sum((investment.current_price * Decimal(0.01)) * investment.shares for investment in investments)
     daily_return_percent = round((daily_return / total_portfolio_value) * 100, 2) if total_portfolio_value else 0
 
+    # Calcular la distribución de activos para la gráfica de pastel
+    asset_allocation = {}
+    for investment in investments:
+        if investment.name not in asset_allocation:
+            asset_allocation[investment.name] = investment.value
+        else:
+            asset_allocation[investment.name] += investment.value
+
+    # Convertir valores de asset_allocation a float
+    asset_allocation = {key: float(value) for key, value in asset_allocation.items()}
+
+    # Generar datos históricos simulados para la gráfica de crecimiento del portafolio
+    portfolio_growth = generate_portfolio_history(total_portfolio_value)
+
+    # Convertir valores de portfolio_growth a float
+    portfolio_growth = [{'date': item['date'], 'value': float(item['value'])} for item in portfolio_growth]
+
     context = {
         'investments': investments,
-        'stock_investments': stock_investments,
-        'crypto_investments': crypto_investments,
         'total_portfolio_value': total_portfolio_value,
-        'total_gain': total_gain,  
+        'total_gain': total_gain,
         'total_gain_percent': total_gain_percent,
         'daily_return': daily_return,
         'daily_return_percent': daily_return_percent,
-        
+        'asset_allocation_json': json.dumps(asset_allocation),
+        'portfolio_growth_json': json.dumps(portfolio_growth),
     }
+
     return render(request, 'investments.html', context)
+
+def generate_portfolio_history(current_value):
+    """
+    Genera datos históricos simulados para el crecimiento del portafolio.
+    En una implementación real, estos datos vendrían de una tabla de historial.
+    """
+    history = []
+    today = datetime.now()
+    
+    # Generar datos para los últimos 12 meses
+    for i in range(12):
+        date = today - timedelta(days=30 * i)
+        date_str = date.strftime('%Y-%m-%d')
+        
+        # Convertir valores a Decimal
+        variation = Decimal(random.uniform(-0.05, 0.08))  # Variación entre -5% y 8%
+        historic_value = current_value * (Decimal(1) - (Decimal(i) * Decimal(0.02)) + variation)
+        
+        history.append({
+            'date': date_str,
+            'value': round(historic_value, 2)  # Redondear a 2 decimales
+        })
+    
+    # Ordenar por fecha (más antiguo primero)
+    history.reverse()
+    
+    return history
 
 def add_investment(request):
     if request.method == 'POST':
@@ -46,6 +97,9 @@ def add_investment(request):
         if form.is_valid():
             print("Formulario válido")
             investment = form.save(commit=False)
+
+            # Asignar el usuario autenticado
+            investment.user = request.user
 
             # Verifica si el símbolo existe
             investment.symbol, _ = InvestmentSymbol.objects.get_or_create(symbol=form.cleaned_data['symbol'])

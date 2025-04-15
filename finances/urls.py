@@ -12,7 +12,9 @@ urlpatterns = [
     path('budgets/<int:pk>/delete/', views.delete_budget, name='delete_budget'),
     path('goals/', views.goal_list, name='goal_list'),
     path('goals/new/', views.create_goal, name='create_goal'),
+    path('goals/<int:pk>/edit/', views.update_goal, name='update_goal'),
+    path('goals/<int:pk>/delete/', views.delete_goal, name='delete_goal'),
     path('reports/', views.report_list, name='report_list'),
     path('reports/new/', views.create_report, name='create_report'),
-    path('signup/', views.signup, name='signup'),
+    path('signup/', views.signup, name='signup'),  # Problema: Esta ruta debe eliminarse
 ]

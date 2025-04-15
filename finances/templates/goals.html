@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'shared_base.html' %}
 {% load static %}
 
 {% block title %}Financial Goals{% endblock %}
@@ -26,6 +26,13 @@
           <div class="progress-bar {% if goal.percentage < 50 %}bg-secondary{% elif goal.percentage < 80 %}bg-amber-500{% else %}bg-destructive{% endif %}" style="width: {{ goal.percentage }}%"></div>
         </div>
         <p class="text-sm mt-2">{{ goal.percentage }}% Complete</p>
+        <div class="flex gap-2 mt-4">
+          <a href="{% url 'update_goal' goal.id %}" class="btn btn-sm btn-outline">Edit</a>
+          <form method="POST" action="{% url 'delete_goal' goal.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </div>
       </div>
       {% endfor %}
     {% else %}

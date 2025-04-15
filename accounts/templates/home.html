@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}MyFinPlanner - Smart Financial Planning{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-blue text-white py-20">
+    <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+                <h1 class="text-4xl md:text-5xl font-bold leading-tight">
+                    Take Control of Your Financial Future
+                </h1>
+                <p class="text-xl text-blue-100">
+                    Smart budgeting, expense tracking, and investment management all in one place.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'signup' %}" class="px-6 py-3 bg-white text-blue-600 rounded-md font-medium hover:bg-blue-50 transition-colors inline-flex items-center justify-center">
+                        Get Started Free <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="#demo" class="px-6 py-3 border border-white text-white rounded-md font-medium hover:bg-blue-700 transition-colors inline-flex items-center justify-center">
+                        See How It Works
+                    </a>
+                </div>
+            </div>
+            <div class="hidden md:block">
+                <div class="relative">
+                    <div class="absolute -top-6 -left-6 w-64 h-64 bg-blue-500 rounded-lg opacity-20"></div>
+                    <div class="relative bg-white rounded-lg shadow-xl overflow-hidden">
+                        <img 
+                            src="https://via.placeholder.com/600x400" 
+                            alt="MyFinPlanner Dashboard Preview" 
+                            class="w-full h-auto"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold mb-4">Powerful Features to Manage Your Finances</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Everything you need to take control of your money, make informed decisions, and build a secure financial future.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100 transition-all hover:shadow-md">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-6">
+                    <i class="fas fa-wallet text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Smart Budgeting</h3>
+                <p class="text-gray-600">
+                    Create personalized budgets that adapt to your spending habits and financial goals.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100 transition-all hover:shadow-md">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-6">
+                    <i class="fas fa-chart-bar text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Expense Tracking</h3>
+                <p class="text-gray-600">
+                    Automatically categorize and track your expenses to understand where your money goes.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100 transition-all hover:shadow-md">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 mb-6">
+                    <i class="fas fa-chart-line text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Investment Management</h3>
+                <p class="text-gray-600">
+                    Track your investments, analyze performance, and make data-driven decisions.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100 transition-all hover:shadow-md">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600 mb-6">
+                    <i class="fas fa-chart-pie text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Financial Reports</h3>
+                <p class="text-gray-600">
+                    Get insightful reports and visualizations to understand your financial health at a glance.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100 transition-all hover:shadow-md">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 mb-6">
+                    <i class="fas fa-magic text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">AI-Powered Assistant</h3>
+                <p class="text-gray-600">
+                    MyFinancePal uses AI-driven analysis to provide personalized suggestions, plan savings goals, and detect unusual spending patterns.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100 transition-all hover:shadow-md">
+                <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center text-teal-600 mb-6">
+                    <i class="fas fa-bullseye text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Goal Setting</h3>
+                <p class="text-gray-600">
+                    Set financial goals and track your progress with visual indicators and milestones.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section with Mission & Vision -->
+<section id="about" class="py-20">
+    <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-2 gap-16 items-center">
+            <div>
+                <img 
+                    src="https://via.placeholder.com/600x500" 
+                    alt="Financial Planning" 
+                    class="rounded-lg shadow-lg"
+                />
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-4">
+                        Our Mission
+                    </div>
+                    <h2 class="text-3xl font-bold mb-6">Empowering Your Financial Journey</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        At MyFinPlanner, we are committed to transforming the way individuals manage their money by offering a smart, accessible, and personalized platform for financial planning. Our mission is to empower people of all ages and financial backgrounds to build healthier money habits, track their income and expenses with clarity, set personalized budgets, and make data-driven decisions that lead to long-term financial well-being.
+                    </p>
+                </div>
+                <div>
+                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-600 text-sm font-medium mb-4">
+                        Our Vision
+                    </div>
+                    <p class="text-gray-600 leading-relaxed">
+                        We envision a world where every person, regardless of their financial literacy, feels confident and in control of their financial future. MyFinPlanner aspires to become the leading digital companion for personal finance management—integrating real-time investment insights, intelligent budget tracking, and interactive visual tools to guide users toward financial freedom.
+                    </p>
+                </div>
+                <a href="/about" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors inline-block mt-4">
+                    Learn More About Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold mb-4">What Our Users Say</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Join thousands of users who have transformed their financial lives with MyFinPlanner.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold mr-4">
+                        JD
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">John Doe</h4>
+                        <p class="text-sm text-gray-500">Small Business Owner</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 italic">
+                    "MyFinPlanner has completely changed how I manage both my personal and business finances. The insights I get have helped me make better financial decisions."
+                </p>
+                <div class="flex text-yellow-400 mt-4">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold mr-4">
+                        JS
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">Jane Smith</h4>
+                        <p class="text-sm text-gray-500">Freelance Designer</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 italic">
+                    "As a freelancer with irregular income, budgeting was always a challenge. MyFinPlanner's flexible budgeting tools have been a game-changer for me."
+                </p>
+                <div class="flex text-yellow-400 mt-4">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold mr-4">
+                        RJ
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">Robert Johnson</h4>
+                        <p class="text-sm text-gray-500">Recent Graduate</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 italic">
+                    "I started using MyFinPlanner right after college to manage my student loans and budget. The debt payoff tools helped me create a plan that works for my situation."
+                </p>
+                <div class="flex text-yellow-400 mt-4">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-blue text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-6">Ready to Take Control of Your Finances?</h2>
+        <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of users who have transformed their financial lives with MyFinPlanner.
+        </p>
+        <a href="{% url 'signup' %}" class="px-6 py-3 bg-white text-blue-600 rounded-md font-medium hover:bg-blue-50 transition-colors inline-flex items-center justify-center">
+            Get Started Free <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+    </div>
+</section>
+{% endblock %}
