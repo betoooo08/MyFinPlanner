@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}MyFinPlanner - Investments{% endblock %}
 
@@ -6,8 +7,9 @@
 <style>
   .chart-container {
     width: 100%;
-    height: 300px;
+    height: 500px; /* Aumentado de 400px a 500px */
     position: relative;
+    margin-bottom: 20px;
   }
 
   .portfolio-item {
@@ -15,7 +17,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0;
-    border-bottom: 1px solid hsl(var(--border));
+    border-bottom: 1px solid #e2e8f0;
   }
 
   .portfolio-item:last-child {
@@ -32,6 +34,30 @@
   .portfolio-name {
     display: flex;
     align-items: center;
+  }
+
+  /* Nuevos estilos para mejorar las gráficas */
+  .chart-card {
+    padding: 20px;
+    height: 100%;
+  }
+
+  .chart-card .card-content {
+    padding: 20px;
+    height: calc(100% - 80px); /* Ajustar para el encabezado */
+  }
+
+  /* Asegurar que las gráficas ocupen todo el espacio disponible */
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Mejorar la visualización en móviles */
+  @media (max-width: 768px) {
+    .chart-container {
+      height: 400px;
+    }
   }
 </style>
 {% endblock %}
@@ -63,7 +89,6 @@
       </div>
       <div class="card-content">
         <div class="text-2xl font-bold">${{ total_portfolio_value|floatformat:2 }}</div>
-        
       </div>
     </div>
     <div class="card">
@@ -102,8 +127,10 @@
     </div>
   </div>
 
-  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-    <div class="card lg-col-span-4">
+  <!-- Gráficas en una sola fila con tamaño completo -->
+  <div class="grid gap-6 md:grid-cols-2">
+    <!-- Gráfica de Crecimiento del Portafolio -->
+    <div class="card chart-card">
       <div class="card-header">
         <h3 class="card-title">Portfolio Performance</h3>
         <p class="card-description">Track your investment growth over time</p>
@@ -113,24 +140,10 @@
           <canvas id="portfolioPerformanceChart"></canvas>
         </div>
       </div>
-      <div class="card-footer flex justify-between">
-        <button class="btn btn-outline btn-sm" id="refresh-data">
-          <i data-lucide="refresh-cw" class="mr-2 h-4 w-4"></i>
-          Refresh Data
-        </button>
-        <div class="flex gap-2">
-          <button class="btn btn-outline btn-sm chart-type" data-type="bar">
-            <i data-lucide="bar-chart-3" class="mr-2 h-4 w-4"></i>
-            Bar
-          </button>
-          <button class="btn btn-outline btn-sm chart-type active" data-type="line">
-            <i data-lucide="line-chart" class="mr-2 h-4 w-4"></i>
-            Line
-          </button>
-        </div>
-      </div>
     </div>
-    <div class="card lg-col-span-3">
+
+    <!-- Gráfica de Distribución de Activos -->
+    <div class="card chart-card">
       <div class="card-header">
         <h3 class="card-title">Asset Allocation</h3>
         <p class="card-description">Current distribution of your investments</p>
@@ -138,11 +151,6 @@
       <div class="card-content">
         <div class="chart-container">
           <canvas id="assetAllocationChart"></canvas>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div class="w-full space-y-1" id="portfolio-breakdown">
-          <!-- Portfolio breakdown will be populated by JavaScript -->
         </div>
       </div>
     </div>
@@ -182,6 +190,7 @@
               <div class="text-right">Change</div>
               <div class="text-right">Shares</div>
               <div class="text-right">Value</div>
+              <div class="text-right">Actions</div>
             </div>
             {% for investment in investments %}
             <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
@@ -206,343 +215,168 @@
             </div>
             {% endfor %}
           </div>
-
-
-        </div>
-        {% else %}
-        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
-          <div class="text-center">
-            <p class="text-sm text-muted-foreground">No investments found in your portfolio</p>
-            <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
-              <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Investment
-            </a>
-          </div>
-        </div>
-        {% endif %}
-
-
-      </div>
-      <div class="tab-content" data-tab-content="stocks">
-        {% if stock_investments %}
-        <div class="rounded-md border">
-          <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
-            <div class="col-span-2">Symbol / Name</div>
-            <div class="text-right">Price</div>
-            <div class="text-right">Change</div>
-            <div class="text-right">Shares</div>
-            <div class="text-right">Value</div>
-          </div>
-          {% for investment in stock_investments %}
-          <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
-            <div class="col-span-2">
-              <div class="font-medium">{{ investment.symbol.symbol }}</div>
-              <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
+          {% else %}
+          <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+            <div class="text-center">
+              <p class="text-sm text-muted-foreground">No investments found in your portfolio</p>
+              <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
+                <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Investment
+              </a>
             </div>
-            <div class="text-right">${{ investment.current_price|floatformat:2 }}</div>
-            <div class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
-              {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }}
-              ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
-            </div>
-            <div class="text-right">{{ investment.shares }}</div>
-            <div class="text-right font-medium">${{ investment.value|floatformat:2 }}</div>
           </div>
-          {% endfor %}
+          {% endif %}
         </div>
-        {% else %}
-        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
-          <div class="text-center">
-            <p class="text-sm text-muted-foreground">No stocks found in your portfolio</p>
-            <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
-              <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Stock
-            </a>
-          </div>
-        </div>
-        {% endif %}
-      </div>
-
-      <div class="tab-content" data-tab-content="crypto">
-        {% if crypto_investments %}
-        <div class="rounded-md border">
-          <div class="grid grid-cols-6 gap-4 p-4 font-medium border-b">
-            <div class="col-span-2">Symbol / Name</div>
-            <div class="text-right">Price</div>
-            <div class="text-right">Change</div>
-            <div class="text-right">Shares</div>
-            <div class="text-right">Value</div>
-          </div>
-          {% for investment in crypto_investments %}
-          <div class="grid grid-cols-6 gap-4 p-4 border-b last:border-0">
-            <div class="col-span-2">
-              <div class="font-medium">{{ investment.symbol.symbol }}</div>
-              <div class="text-sm text-muted-foreground">{{ investment.name }}</div>
-            </div>
-            <div class="text-right">${{ investment.current_price|floatformat:2 }}</div>
-            <div class="text-right {% if investment.change >= 0 %}text-secondary{% else %}text-destructive{% endif %}">
-              {% if investment.change >= 0 %}+{% endif %}${{ investment.change|floatformat:2 }}
-              ({% if investment.change_percent >= 0 %}+{% endif %}{{ investment.change_percent|floatformat:2 }}%)
-            </div>
-            <div class="text-right">{{ investment.shares }}</div>
-            <div class="text-right font-medium">${{ investment.value|floatformat:2 }}</div>
-          </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
-          <div class="text-center">
-            <p class="text-sm text-muted-foreground">No cryptocurrencies found in your portfolio</p>
-            <a href="{% url 'add_investment' %}" class="btn btn-outline btn-sm mt-4">
-              <i data-lucide="plus" class="mr-2 h-4 w-4"></i> Add Cryptocurrency
-            </a>
-          </div>
-        </div>
-        {% endif %}
       </div>
     </div>
   </div>
 </div>
-</div>
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Tab switching functionality
-    const tabButtons = document.querySelectorAll('.tab');
-    tabButtons.forEach(button => {
-      button.addEventListener('click', function () {
-        const tabValue = this.getAttribute('data-tab');
-        const tabList = this.closest('.tabs-list');
-        const tabsContainer = this.closest('.tabs');
+    // Datos para las gráficas
+    const assetAllocationData = {{ asset_allocation_json|safe }};
+    const portfolioGrowthData = {{ portfolio_growth_json|safe }};
 
-        // Update active tab button
-        tabList.querySelectorAll('.tab').forEach(tab => {
-          tab.classList.remove('active');
-        });
-        this.classList.add('active');
+    // Colores para las gráficas
+    const colors = [
+      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+      '#FF9F40', '#8AC249', '#EA5F89', '#00D8B6', '#FFB7B2'
+    ];
 
-        // Update active tab content
-        tabsContainer.querySelectorAll('.tab-content').forEach(content => {
-          content.classList.remove('active');
-        });
-        tabsContainer.querySelector(`.tab-content[data-tab-content="${tabValue}"]`).classList.add('active');
-      });
-    });
-
-    // Chart type switching
-    const chartTypeButtons = document.querySelectorAll('.chart-type');
-    chartTypeButtons.forEach(button => {
-      button.addEventListener('click', function () {
-        chartTypeButtons.forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-
-        const chartType = this.getAttribute('data-type');
-        updateChartType(chartType);
-      });
-    });
-
-    // Refresh data button
-    const refreshButton = document.getElementById('refresh-data');
-    if (refreshButton) {
-      refreshButton.addEventListener('click', function () {
-        window.location.reload();
-      });
-    }
-
-    // Portfolio Performance Chart
-    const portfolioCtx = document.getElementById('portfolioPerformanceChart').getContext('2d');
-    let portfolioChart;
-
-    // Asset Allocation Chart
-    const allocationCtx = document.getElementById('assetAllocationChart').getContext('2d');
-    let allocationChart;
-
-    // Investment data from Django
-    const investments = JSON.parse('{{ investments_json|escapejs }}');
-
-
-    // Calculate portfolio data
-    const portfolioData = calculatePortfolioData(investments);
-    const allocationData = calculateAllocationData(investments);
-
-    // Initialize charts
-    initializeCharts(portfolioData, allocationData);
-
-    // Update portfolio breakdown
-    updatePortfolioBreakdown(allocationData);
-
-    function calculatePortfolioData(investments) {
-      // This is a simplified version - in a real app, you would have historical data
-      // For now, we'll create some mock data based on the current investments
-      const today = new Date();
-      const data = [];
-
-      // Create data points for the last 15 days
-      for (let i = 14; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-
-        // Calculate a value with some random variation
-        const baseValue = parseFloat("{{ total_portfolio_value|default:0 }}");
-        const randomFactor = 0.98 + (Math.random() * 0.04); // Random between 0.98 and 1.02
-        const value = baseValue * (1 - (i * 0.01)) * randomFactor; // Decreasing trend with random noise
-
-        data.push({
-          date: date.toISOString().split('T')[0],
-          value: value
-        });
-      }
-
-      return data;
-    }
-
-    function calculateAllocationData(investments) {
-      // Group investments by type
-      const typeGroups = {};
-      let totalValue = 0;
-
-      investments.forEach(inv => {
-        const type = inv.symbol_type;
-        const value = parseFloat(inv.value);
-        totalValue += value;
-
-        if (!typeGroups[type]) {
-          typeGroups[type] = 0;
-        }
-        typeGroups[type] += value;
-      });
-
-      // Convert to array format for chart
-      const data = [];
-      const colors = {
-        'Stock': '#0088FE',
-        'Crypto': '#00C49F',
-        'ETF': '#FFBB28',
-        'Bond': '#FF8042',
-        'Other': '#8884d8'
-      };
-
-      Object.keys(typeGroups).forEach(type => {
-        data.push({
-          name: type,
-          value: typeGroups[type],
-          percentage: (typeGroups[type] / totalValue * 100).toFixed(1),
-          color: colors[type] || '#8884d8'
-        });
-      });
-
-      return data;
-    }
-
-    function initializeCharts(portfolioData, allocationData) {
-      // Portfolio Performance Chart
-      portfolioChart = new Chart(portfolioCtx, {
-        type: 'line',
-        data: {
-          labels: portfolioData.map(item => item.date),
-          datasets: [{
-            label: 'Portfolio Value',
-            data: portfolioData.map(item => item.value),
-            borderColor: '#0ea5e9',
-            backgroundColor: 'rgba(14, 165, 233, 0.1)',
-            tension: 0.1,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: false
+    // Gráfica de Distribución de Activos (Asset Allocation)
+    const assetAllocationCtx = document.getElementById('assetAllocationChart').getContext('2d');
+    new Chart(assetAllocationCtx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(assetAllocationData),
+        datasets: [{
+          data: Object.values(assetAllocationData),
+          backgroundColor: colors.slice(0, Object.keys(assetAllocationData).length),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              boxWidth: 15,
+              padding: 20,
+              font: {
+                size: 14
+              }
             }
-          }
-        }
-      });
-
-      // Asset Allocation Chart
-      allocationChart = new Chart(allocationCtx, {
-        type: 'doughnut',
-        data: {
-          labels: allocationData.map(item => item.name),
-          datasets: [{
-            data: allocationData.map(item => item.value),
-            backgroundColor: allocationData.map(item => item.color),
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
+          },
+          tooltip: {
+            titleFont: {
+              size: 16
             },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  const label = context.label || '';
-                  const value = context.raw || 0;
-                  const percentage = allocationData[context.dataIndex].percentage;
-                  return `${label}: $${value.toFixed(2)} (${percentage}%)`;
-                }
+            bodyFont: {
+              size: 14
+            },
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                return `${label}: $${value.toFixed(2)} (${percentage}%)`;
               }
             }
           }
         }
-      });
-    }
+      }
+    });
 
-    function updateChartType(type) {
-      if (!portfolioChart) return;
-
-      portfolioChart.destroy();
-
-      portfolioChart = new Chart(portfolioCtx, {
-        type: type,
-        data: {
-          labels: portfolioData.map(item => item.date),
-          datasets: [{
-            label: 'Portfolio Value',
-            data: portfolioData.map(item => item.value),
-            borderColor: '#0ea5e9',
-            backgroundColor: type === 'line' ? 'rgba(14, 165, 233, 0.1)' : '#0ea5e9',
-            tension: 0.1,
-            fill: type === 'line'
-          }]
+    // Gráfica de Crecimiento del Portafolio (Portfolio Performance)
+    const portfolioPerformanceCtx = document.getElementById('portfolioPerformanceChart').getContext('2d');
+    new Chart(portfolioPerformanceCtx, {
+      type: 'line',
+      data: {
+        labels: portfolioGrowthData.map(item => item.date),
+        datasets: [{
+          label: 'Portfolio Value',
+          data: portfolioGrowthData.map(item => item.value),
+          borderColor: '#36A2EB',
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Date',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            },
+            grid: {
+              display: false
+            },
+            ticks: {
+              font: {
+                size: 12
+              }
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Value ($)',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            },
+            beginAtZero: false,
+            ticks: {
+              font: {
+                size: 12
+              },
+              callback: function(value) {
+                return '$' + value.toLocaleString();
+              }
+            }
+          }
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: false
+        plugins: {
+          legend: {
+            labels: {
+              font: {
+                size: 14
+              }
+            }
+          },
+          tooltip: {
+            titleFont: {
+              size: 16
+            },
+            bodyFont: {
+              size: 14
+            },
+            callbacks: {
+              label: function(context) {
+                return `Value: $${context.raw.toFixed(2)}`;
+              }
             }
           }
         }
-      });
-    }
-
-    function updatePortfolioBreakdown(allocationData) {
-      const container = document.getElementById('portfolio-breakdown');
-      if (!container) return;
-
-      container.innerHTML = '';
-
-      allocationData.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'portfolio-item';
-
-        div.innerHTML = `
-          <div class="portfolio-name">
-            <div class="portfolio-color" style="background-color: ${item.color}"></div>
-            <span class="text-sm">${item.name}</span>
-          </div>
-          <span class="text-sm font-medium">$${item.value.toFixed(2)} (${item.percentage}%)</span>
-        `;
-
-        container.appendChild(div);
-      });
-    }
+      }
+    });
   });
 </script>
 {% endblock %}
