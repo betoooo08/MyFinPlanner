@@ -14,12 +14,10 @@ from datetime import datetime, timedelta
 import random
 import json
 
-# Create your views here.
-# Configurar el cliente de Finnhub
 finnhub_client = finnhub.Client(api_key=settings.FINNHUB_API_KEY)
 
 def investment_list(request):
-    investments = Investment.objects.filter(user=request.user) #Filtrar por usuario
+    investments = Investment.objects.filter(user=request.user)  # Filtrar por usuario
 
     # Calcular el valor total del portafolio
     total_portfolio_value = sum(investment.value for investment in investments)
@@ -58,6 +56,7 @@ def investment_list(request):
         'daily_return_percent': daily_return_percent,
         'asset_allocation_json': json.dumps(asset_allocation),
         'portfolio_growth_json': json.dumps(portfolio_growth),
+        'active_page': 'investment_list',  # Añadido para destacar el enlace "Investments"
     }
 
     return render(request, 'investments.html', context)

@@ -3,7 +3,9 @@ from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 
 def home_view(request):
-    return render(request, 'home.html')  # Asegúrate de que esta plantilla exista
+    return render(request, 'home.html', {
+        'active_page': 'home'  # Asegúrate de que coincida con el menú
+    })
 
 def signup_view(request):
     if request.method == 'POST':

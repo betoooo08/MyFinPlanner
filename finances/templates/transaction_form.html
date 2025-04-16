@@ -1,9 +1,19 @@
 {% extends 'shared_base.html' %}
-{% block title %}Transaction Form{% endblock %}
+{% block title %}MyFinPlanner - Transaction Form{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
   <h2>Add Transaction</h2>
+
+  <!-- Mostrar mensajes de éxito o error -->
+  {% if messages %}
+  <div class="messages mb-4">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}MyFinPlanner{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.14.0"></script>
   {% block extra_head %}{% endblock %}
@@ -47,27 +48,27 @@
             <span class="text-lg font-bold">MyFinPlanner</span>
           </div>
           <nav class="grid gap-2 px-2">
-            <a href="{% url 'dashboard' %}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+            <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">
               <i data-lucide="home"></i>
               Dashboard
             </a>
-            <a href="{% url 'transaction_list' %}" class="nav-link {% if active_page == 'transactions' %}active{% endif %}">
+            <a href="{% url 'transaction_list' %}" class="nav-link {% if '/finances/transactions/' in request.path %}active{% endif %}">
               <i data-lucide="credit-card"></i>
               Transactions
             </a>
-            <a href="{% url 'budget_list' %}" class="nav-link {% if active_page == 'budgets' %}active{% endif %}">
+            <a href="{% url 'budget_list' %}" class="nav-link {% if '/finances/budgets/' in request.path %}active{% endif %}">
               <i data-lucide="wallet"></i>
               Budgets
             </a>
-            <a href="{% url 'investment_list' %}" class="nav-link {% if active_page == 'investments' %}active{% endif %}">
+            <a href="{% url 'investment_list' %}" class="nav-link {% if '/investments/' in request.path %}active{% endif %}">
               <i data-lucide="dollar-sign"></i>
               Investments
             </a>
-            <a href="{% url 'goal_list' %}" class="nav-link {% if active_page == 'goals' %}active{% endif %}">
+            <a href="{% url 'goal_list' %}" class="nav-link {% if '/finances/goals/' in request.path %}active{% endif %}">
               <i data-lucide="target"></i>
               Goals
             </a>
-            <a href="{% url 'report_list' %}" class="nav-link {% if active_page == 'reports' %}active{% endif %}">
+            <a href="{% url 'report_list' %}" class="nav-link {% if '/finances/reports/' in request.path %}active{% endif %}">
               <i data-lucide="file-text"></i>
               Reports
             </a>

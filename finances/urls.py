@@ -14,7 +14,8 @@ urlpatterns = [
     path('goals/new/', views.create_goal, name='create_goal'),
     path('goals/<int:pk>/edit/', views.update_goal, name='update_goal'),
     path('goals/<int:pk>/delete/', views.delete_goal, name='delete_goal'),
+    path('goals/<int:pk>/add-contribution/', views.add_contribution, name='add_contribution'),  # Nueva ruta
     path('reports/', views.report_list, name='report_list'),
     path('reports/new/', views.create_report, name='create_report'),
-    path('signup/', views.signup, name='signup'),  # Problema: Esta ruta debe eliminarse
+    path('signup/', views.signup, name='signup'),
 ]

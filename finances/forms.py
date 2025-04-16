@@ -19,7 +19,7 @@ class BudgetForm(forms.ModelForm):
 class GoalForm(forms.ModelForm):
     class Meta:
         model = Goal
-        fields = ['name', 'target_amount', 'current_amount', 'deadline', 'monthly_contribution', 'description']
+        fields = ['name', 'target_amount', 'current_amount', 'deadline', 'description']
         widgets = {
             'deadline': forms.DateInput(attrs={'type': 'date'}),
         }

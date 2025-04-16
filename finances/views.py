@@ -13,11 +13,15 @@ import requests
 from decimal import Decimal
 import finnhub
 from django.http import JsonResponse
+from django.core.exceptions import ValidationError
 
 # Importar modelos de la app finances
 from .models import Transaction, Budget, Goal, Report
 # Importar modelos y formularios de la app investments
 from investments.models import Investment, InvestmentSymbol
+
+# Importar modelo GoalContribution
+from .models import GoalContribution
 from investments.forms import InvestmentForm
 # Formularios propios de finances
 from .forms import TransactionForm, BudgetForm, GoalForm, ReportForm
@@ -152,8 +156,13 @@ def create_transaction(request):
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = request.user
-            transaction.save()
-            return redirect('transaction_list')
+            try:
+                transaction.save()  # Aquí se ejecutará la señal pre_save del modelo
+                messages.success(request, "Transaction created successfully.")
+                return redirect('transaction_list')
+            except ValidationError as e:
+                # Capturamos el error de validación y lo mostramos al usuario
+                messages.error(request, e.message)
     else:
         form = TransactionForm()
     return render(request, 'transaction_form.html', {
@@ -178,6 +187,14 @@ def delete_transaction(request, pk):
 @login_required
 def budget_list(request):
     budgets = Budget.objects.filter(user=request.user)
+
+    # Añadimos las transacciones relacionadas a cada presupuesto
+    for budget in budgets:
+        budget.transactions = Transaction.objects.filter(
+            user=request.user,
+            category=budget.category
+        )
+
     return render(request, 'budgets.html', {
         'budgets': budgets,
         'active_page': 'budget_list'
@@ -278,6 +295,55 @@ def delete_goal(request, pk):
         'active_page': 'goal_list'
     })
     
+@login_required
+def add_contribution(request, pk):
+    """
+    Vista para añadir una contribución a una meta.
+    """
+    goal = get_object_or_404(Goal, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        try:
+            # Manejar solicitudes JSON
+            if request.content_type == 'application/json':
+                import json
+                body = json.loads(request.body)
+                amount = Decimal(body.get('amount', 0))
+            else:
+                amount = Decimal(request.POST.get('amount', 0))
+
+            if amount <= 0:
+                return JsonResponse({'success': False, 'error': 'El monto debe ser mayor a 0.'})
+
+            # Validar si la meta ya está completa
+            if goal.current_amount >= goal.target_amount:
+                return JsonResponse({'success': False, 'error': 'La meta ya está completa. No se pueden añadir más contribuciones.'})
+
+            # Validar si la contribución excede el monto restante
+            if goal.current_amount + amount > goal.target_amount:
+                exceso = (goal.current_amount + amount) - goal.target_amount
+                return JsonResponse({
+                    'success': False,
+                    'error': f'La contribución excede el monto objetivo de la meta por ${exceso:.2f}.',
+                })
+
+            # Crear la contribución y actualizar el progreso de la meta
+            GoalContribution.objects.create(goal=goal, amount=amount, date=timezone.now())
+            goal.current_amount += amount
+            goal.save()
+
+            # Retornar una respuesta JSON con los datos actualizados
+            return JsonResponse({
+                'success': True,
+                'new_amount': float(goal.current_amount),
+                'percentage': goal.percentage,
+                'remaining': float(goal.remaining),
+            })
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido.'})
 # ------------------------------------------------------------------
 # Vistas de Reports
 # ------------------------------------------------------------------

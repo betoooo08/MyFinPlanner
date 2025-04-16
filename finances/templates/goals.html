@@ -1,12 +1,13 @@
+<!-- filepath: c:\Users\alcef\MyFinPlanner\finances\templates\goals.html -->
 {% extends 'shared_base.html' %}
 {% load static %}
 
-{% block title %}Financial Goals{% endblock %}
+{% block title %}MyFinPlanner - Financial Goals{% endblock %}
 
 {% block content %}
 <div class="flex flex-col gap-4">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="text-2xl font-bold">Goals</h2>
+    <h2 class="text-2xl font-bold">Financial Goals</h2>
     <a href="{% url 'create_goal' %}" class="btn btn-primary">Add Goal</a>
   </div>
 
@@ -17,16 +18,16 @@
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-bold">{{ goal.name }}</h3>
           <div>
-            <span class="text-sm">Target: ${{ goal.target_amount }}</span>
+            <span class="text-sm text-muted">Target: ${{ goal.target_amount }}</span>
           </div>
         </div>
-        <p>Current: ${{ goal.current_amount }}</p>
-        <p>Deadline: {{ goal.deadline|date:"M d, Y" }}</p>
+        <p class="text-sm mt-2">Saved: ${{ goal.current_amount }} | Remaining: ${{ goal.remaining }}</p>
         <div class="progress-container mt-2">
           <div class="progress-bar {% if goal.percentage < 50 %}bg-secondary{% elif goal.percentage < 80 %}bg-amber-500{% else %}bg-destructive{% endif %}" style="width: {{ goal.percentage }}%"></div>
         </div>
         <p class="text-sm mt-2">{{ goal.percentage }}% Complete</p>
         <div class="flex gap-2 mt-4">
+          <button class="btn btn-sm btn-outline add-contribution-btn" data-goal-id="{{ goal.id }}">Add Contribution</button>
           <a href="{% url 'update_goal' goal.id %}" class="btn btn-sm btn-outline">Edit</a>
           <form method="POST" action="{% url 'delete_goal' goal.id %}">
             {% csrf_token %}
@@ -40,4 +41,8 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'shared/goals.js' %}"></script>
 {% endblock %}

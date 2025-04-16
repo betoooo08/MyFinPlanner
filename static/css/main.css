@@ -774,3 +774,119 @@
     width: 1.5rem;
     height: 1.5rem;
   }
+
+  /* Estilo para el botón de cambio de tema */
+#theme-toggle {
+  background-color: hsl(var(--muted));
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+#theme-toggle:hover {
+  background-color: hsl(var(--primary));
+  transform: scale(1.1);
+}
+
+#theme-toggle i {
+  color: hsl(var(--foreground));
+  font-size: 1.25rem;
+}
+
+/* Ajustes para los íconos */
+.dark-icon,
+.light-icon {
+  transition: opacity 0.3s ease;
+}
+
+/* Botón de configuración (opcional, para consistencia visual) */
+.btn-icon {
+  background-color: hsl(var(--muted));
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-icon:hover {
+  background-color: hsl(var(--primary));
+  transform: scale(1.1);
+}
+
+/* Barra de progreso */
+.progress-container {
+  background-color: hsl(var(--muted));
+  border-radius: 9999px;
+  overflow: hidden;
+  height: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Colores dinámicos para la barra de progreso */
+.bg-secondary {
+  background-color: hsl(var(--secondary)); /* Verde */
+}
+
+.bg-amber-500 {
+  background-color: hsl(var(--amber-500)); /* Amarillo */
+}
+
+.bg-destructive {
+  background-color: hsl(var(--destructive)); /* Rojo */
+}
+
+/* Botón de contribución */
+.add-contribution-btn {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.add-contribution-btn:hover {
+  background-color: hsl(var(--primary) / 0.9);
+  transform: scale(1.05);
+}
+
+/* Botón IA */
+#ai-button {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#ai-button:hover {
+  background-color: hsl(var(--secondary) / 0.9);
+  transform: scale(1.05);
+}
+
+/* Estilo para el enlace activo */
+.nav-link.active {
+  font-weight: bold;
+  color: hsl(var(--primary));
+  border-bottom: 2px solid hsl(var(--primary));
+}

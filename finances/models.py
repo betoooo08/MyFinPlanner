@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.core.exceptions import ValidationError
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 class Category(models.Model):
@@ -78,19 +80,18 @@ class Goal(models.Model):
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     current_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     deadline = models.DateField()
-    monthly_contribution = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True)
-    
+
     @property
     def percentage(self):
         if self.target_amount == 0:
             return 0
         return int((self.current_amount / self.target_amount) * 100)
-    
+
     @property
     def remaining(self):
         return self.target_amount - self.current_amount
-    
+
     def __str__(self):
         return f"{self.name}: {self.current_amount}/{self.target_amount}"
 
@@ -98,13 +99,18 @@ class GoalContribution(models.Model):
     goal = models.ForeignKey(Goal, on_delete=models.CASCADE, related_name='contributions')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
-    
+
     def save(self, *args, **kwargs):
+        # Validar que la contribución no exceda el monto restante de la meta
+        if self.goal.current_amount + self.amount > self.goal.target_amount:
+            raise ValidationError("La contribución excede el monto objetivo de la meta.")
+        
         super().save(*args, **kwargs)
+        
         # Actualizar el monto actual del objetivo
         self.goal.current_amount = sum(c.amount for c in self.goal.contributions.all())
         self.goal.save()
-    
+
     def __str__(self):
         return f"Contribution to {self.goal.name}: {self.amount}"
 
@@ -137,3 +143,26 @@ class Report(models.Model):
     
     def __str__(self):
         return f"{self.name} ({self.format})"
+    
+@receiver(pre_save, sender=Transaction)
+def validate_and_update_budget(sender, instance, **kwargs):
+    """
+    Valida y actualiza el presupuesto asociado a una transacción de tipo 'expense'.
+    Si no hay fondos suficientes en el presupuesto, lanza un ValidationError.
+    """
+    if instance.transaction_type == 'expense':
+        try:
+            # Buscar el presupuesto asociado a la categoría y usuario de la transacción
+            budget = Budget.objects.get(user=instance.user, category=instance.category)
+            new_spent = budget.spent + instance.amount
+
+            # Verificar si el gasto excede el presupuesto
+            if new_spent > budget.amount:
+                raise ValidationError("No hay fondos suficientes en el presupuesto.")
+
+            # Actualizar el campo 'spent' del presupuesto
+            budget.spent = new_spent
+            budget.save()
+        except Budget.DoesNotExist:
+            # Si no existe un presupuesto asociado, no se realiza ninguna acción
+            pass

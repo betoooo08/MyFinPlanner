@@ -1,10 +1,20 @@
 {% extends 'shared_base.html' %}
 {% load static %}
 
-{% block title %}Transactions{% endblock %}
+{% block title %}MyFinPlanner - Transactions{% endblock %}
 
 {% block content %}
 <div class="flex flex-col gap-4">
+
+  <!-- Mostrar mensajes de éxito o error -->
+  {% if messages %}
+  <div class="messages mb-4">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-2xl font-bold">Transactions</h2>
     <a href="{% url 'create_transaction' %}" class="btn btn-primary">Add Transaction</a>

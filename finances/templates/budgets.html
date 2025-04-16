@@ -1,3 +1,5 @@
+<!-- filepath: c:\Users\alcef\MyFinPlanner\finances\templates\budgets.html -->
+
 {% extends 'shared_base.html' %}
 {% load static %}
 
@@ -64,7 +66,7 @@
       </div>
       <div class="transactions-content hidden">
         <div class="px-6 pb-4 pt-0">
-          {% for transaction in budget.transactions.all %}
+          {% for transaction in budget.transactions %}
           <div class="flex items-center justify-between border-t pt-2">
             <div>
               <p class="text-sm">{{ transaction.description }}</p>
