@@ -1,4 +1,47 @@
 # Ignorar carpetas de caché de Python
-__pycache__/
+# Ignorar carpetas de caché de Python
+_pycache_/
 *.pyc
 *.pyo
+
+# Ignorar la base de datos SQLite
+db.sqlite3
+
+# Ignorar migraciones generadas automáticamente
+*/migrations/.py
+!**/migrations/_init_.py
+
+# Ignorar archivos de configuración local
+*.env
+.env.*
+.envrc
+
+# Ignorar archivos de dependencias de Python
+*.log
+*.pot
+*.py[cod]
+*.sqlite3
+*.coverage
+*.cover
+*.egg
+*.eggs
+*.manifest
+*.spec
+
+# Ignorar configuraciones de IDEs y editores
+.vscode/
+.idea/
+
+# Ignorar archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Ignorar cachés y entornos virtuales
+*.pytest_cache/
+.tox/
+.venv/
+.env/
+
+# Ignorar archivos estáticos generados automáticamente
+staticfiles/
+media/
