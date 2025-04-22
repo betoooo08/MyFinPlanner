@@ -8,6 +8,7 @@ urlpatterns = [
     path('', include('accounts.urls')),  # Prefijo para home y accounts
     path('finances/', include('finances.urls')),  # Prefijo para finances
     path('investments/', include('investments.urls')),  # Prefijo para investments
+    path('analytics/', include('analytics.urls')),  # Prefijo para analytics
 ]
 
 # Añadir esta configuración para servir archivos estáticos en desarrollo

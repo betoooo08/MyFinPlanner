@@ -1,56 +1,243 @@
 {% extends 'shared_base.html' %}
 {% load static %}
 
-{% block title %}MyFinPlanner - Reports{% endblock %}
+{% block title %}MyFinPlanner - Financial Reports{% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
 
 {% block content %}
-<div class="flex flex-col gap-4">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-2xl font-bold">Reports</h2>
-    <a href="{% url 'create_report' %}" class="btn btn-primary">Generate Report</a>
+<div class="container mx-auto px-4 py-8">
+  <div class="flex flex-col gap-2 mb-6">
+    <h1 class="text-3xl font-bold tracking-tight">Reports</h1>
+    <p class="text-muted-foreground">Generate and download financial reports and visualizations</p>
   </div>
 
-  <div class="card p-4">
-    <table class="table w-full">
+  <div class="report-grid">
+    <!-- Generate Report Section -->
+    <div class="report-section col-span-1">
+      <h2 class="report-section-title">Date Range</h2>
+      <p class="report-section-description">Select the date range for your report</p>
+
+      <div class="date-range">
+        <div class="form-group">
+          <label for="start-date" class="form-label">Start Date</label>
+          <input type="date" id="start-date" class="form-input" value="2023-01-01">
+        </div>
+        <div class="form-group">
+          <label for="end-date" class="form-label">End Date</label>
+          <input type="date" id="end-date" class="form-input" value="2023-03-31">
+        </div>
+      </div>
+
+      <div class="form-group preset-periods">
+        <label for="preset-period" class="form-label">Preset Periods</label>
+        <select id="preset-period" class="form-select">
+          <option value="current-quarter">Current Quarter</option>
+          <option value="previous-quarter">Previous Quarter</option>
+          <option value="current-year">Current Year</option>
+          <option value="previous-year">Previous Year</option>
+          <option value="last-30-days">Last 30 Days</option>
+          <option value="last-90-days">Last 90 Days</option>
+          <option value="custom">Custom Range</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Report Type Section -->
+    <div class="report-section col-span-1">
+      <h2 class="report-section-title">Report Type</h2>
+      <p class="report-section-description">Select what type of report to generate</p>
+
+      <div class="form-group">
+        <label for="report-category" class="form-label">Category</label>
+        <select id="report-category" class="form-select">
+          <option value="income-expense">Income & Expense</option>
+          <option value="budget">Budget</option>
+          <option value="investments">Investments</option>
+          <option value="savings">Savings</option>
+          <option value="debt">Debt</option>
+          <option value="net-worth">Net Worth</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="report-format" class="form-label">Format</label>
+        <select id="report-format" class="form-select">
+          <option value="pdf">PDF Document</option>
+          <option value="csv">CSV Spreadsheet</option>
+          <option value="excel">Excel Spreadsheet</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="include-visualizations" class="form-label">Include Visualizations</label>
+        <select id="include-visualizations" class="form-select">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Generate Report Section -->
+    <div class="report-section col-span-1">
+      <h2 class="report-section-title">Generate Report</h2>
+      <p class="report-section-description">Name and download your financial report</p>
+
+      <div class="form-group">
+        <label for="report-name" class="form-label">Report Name</label>
+        <input type="text" id="report-name" class="form-input" placeholder="My Financial Report">
+      </div>
+
+      <div class="form-group">
+        <label for="report-description" class="form-label">Description (Optional)</label>
+        <textarea id="report-description" class="form-textarea" placeholder="Report description..."></textarea>
+      </div>
+
+      <button type="button" class="generate-btn">
+        <i class="fas fa-file-export"></i>
+        Generate Report
+      </button>
+    </div>
+  </div>
+
+  <!-- AI Insights Section -->
+  <div class="ai-insights-section">
+    <div class="ai-insights-header">
+      <div class="ai-insights-icon">
+        <i class="fas fa-robot"></i>
+      </div>
+      <div>
+        <h3 class="ai-insights-title">AI-Powered Financial Insights</h3>
+        <p class="ai-insights-description">Get personalized insights based on your transactions and budgets</p>
+      </div>
+    </div>
+
+    <div class="ai-insights-content">
+      {% if insight %}
+        <!-- Si hay un insight generado, mostrarlo -->
+        <div id="ai-insight-result" class="ai-insight-result active">
+          <h4>Financial Analysis</h4>
+          <div class="insight-content">
+            {{ insight|linebreaks }}
+          </div>
+        </div>
+      {% else %}
+        <!-- Si no hay insight, mostrar el placeholder -->
+        <div class="ai-insights-placeholder">
+          <i class="fas fa-chart-line"></i>
+          <p>Generate AI insights to receive personalized recommendations about your transactions and budgets.</p>
+          <p>Our AI will analyze your financial data and provide actionable suggestions to help you improve your financial health.</p>
+        </div>
+      {% endif %}
+      
+      <!-- Contenedor para el spinner de carga -->
+      <div id="ai-loading" class="ai-loading">
+        <div class="ai-loading-spinner"></div>
+        <span>Analyzing your financial data...</span>
+      </div>
+      
+      <!-- Botón para generar insights de AI -->
+      <form method="post" action="{% url 'ai_transactions_and_budgets_insight' %}" id="ai-insight-form">
+        {% csrf_token %}
+        <button type="submit" class="ai-generate-btn">
+          <i class="fas fa-brain"></i>
+          Generate AI Insight
+        </button>
+      </form>      
+    </div>
+  </div>
+
+  <!-- Saved Reports Section -->
+  <div class="report-section mt-8">
+    <h2 class="report-section-title">Saved Reports</h2>
+    <p class="report-section-description">Previously generated financial reports</p>
+
+    <table class="saved-reports-table">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Format</th>
-          <th>Period</th>
-          <th>Created At</th>
-          <th>Download</th>
+          <th>Report Name</th>
+          <th>Type</th>
+          <th>Date</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        {% for report in reports %}
         <tr>
-          <td>{{ report.name }}</td>
-          <td>{{ report.category }}</td>
-          <td>{{ report.format }}</td>
-          <td>{{ report.start_date|date:"M d, Y" }} - {{ report.end_date|date:"M d, Y" }}</td>
-          <td>{{ report.created_at|date:"M d, Y" }}</td>
           <td>
-            {% if report.file %}
-              <a href="{{ report.file.url }}" class="btn btn-sm btn-primary">Download</a>
-            {% else %}
-              N/A
-            {% endif %}
+            <div class="report-name">Monthly Income Statement</div>
+            <div class="report-size">245 KB</div>
+          </td>
+          <td>PDF</td>
+          <td>03/31/2023</td>
+          <td>
+            <div class="report-actions">
+              <button class="report-action-btn" title="Download Report">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="report-action-btn" title="Delete Report">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
           </td>
         </tr>
-        {% empty %}
         <tr>
-          <td colspan="6" class="text-center">No reports available.</td>
+          <td>
+            <div class="report-name">Quarterly Expense Report</div>
+            <div class="report-size">128 KB</div>
+          </td>
+          <td>CSV</td>
+          <td>03/31/2023</td>
+          <td>
+            <div class="report-actions">
+              <button class="report-action-btn" title="Download Report">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="report-action-btn" title="Delete Report">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
         </tr>
-        {% endfor %}
+        <tr>
+          <td>
+            <div class="report-name">Annual Budget Summary</div>
+            <div class="report-size">512 KB</div>
+          </td>
+          <td>PDF</td>
+          <td>12/31/2022</td>
+          <td>
+            <div class="report-actions">
+              <button class="report-action-btn" title="Download Report">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="report-action-btn" title="Delete Report">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="report-name">Investment Portfolio Report</div>
+            <div class="report-size">356 KB</div>
+          </td>
+          <td>PDF</td>
+          <td>03/31/2023</td>
+          <td>
+            <div class="report-actions">
+              <button class="report-action-btn" title="Download Report">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="report-action-btn" title="Delete Report">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
-  </div>
-
-  <!-- Nueva sección para el botón "IA" -->
-  <div class="mt-8">
-    <h3 class="text-xl font-bold mb-4">AI Tools</h3>
-    <button id="ai-button" class="btn btn-secondary">IA</button>
   </div>
 </div>
 {% endblock %}

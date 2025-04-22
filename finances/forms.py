@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django import forms
 from .models import Transaction, Budget, Goal, GoalContribution, Report
 
@@ -14,12 +15,16 @@ class BudgetForm(forms.ModelForm):
         model = Budget
         fields = ['category', 'amount', 'period', 'alert_threshold']
 
-
-
 class GoalForm(forms.ModelForm):
+    initial_contribution = forms.DecimalField(
+        label="Initial Contribution",
+        max_digits=12, decimal_places=2,
+        required=False,
+        widget=forms.NumberInput(attrs={'step':'0.01','min':'0'})
+    )
     class Meta:
         model = Goal
-        fields = ['name', 'target_amount', 'current_amount', 'deadline', 'description']
+        fields = ['name', 'target_amount', 'initial_contribution', 'deadline', 'description']
         widgets = {
             'deadline': forms.DateInput(attrs={'type': 'date'}),
         }

@@ -1,47 +1,54 @@
-# Ignorar carpetas de caché de Python
-# Ignorar carpetas de caché de Python
-_pycache_/
-*.pyc
-*.pyo
+# Byte‑compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Ignorar la base de datos SQLite
+# Base de datos SQLite
 db.sqlite3
 
-# Ignorar migraciones generadas automáticamente
-*/migrations/.py
-!**/migrations/_init_.py
+# Migraciones de Django (ignoramos todo salvo el __init__.py)
+**/migrations/*.py
+!**/migrations/__init__.py
+**/migrations/*.py[cod]
 
-# Ignorar archivos de configuración local
-*.env
+# Archivos de entorno / configuración local
+.env
 .env.*
 .envrc
+api_keys.env
 
-# Ignorar archivos de dependencias de Python
-*.log
-*.pot
-*.py[cod]
-*.sqlite3
-*.coverage
+# Cachés de test, cobertura, dependencias
+.pytest_cache/
+.coverage
 *.cover
-*.egg
+*.egg-info/
 *.eggs
 *.manifest
 *.spec
 
-# Ignorar configuraciones de IDEs y editores
+# Logs
+*.log
+
+# Entornos virtuales y caches de empaquetado
+.venv/
+venv/
+.env/
+to*
+pip-wheel-metadata/
+
+# Configuraciones de editor/IDE
 .vscode/
 .idea/
 
-# Ignorar archivos del sistema operativo
+# Archivos del sistema operativo
 .DS_Store
 Thumbs.db
 
-# Ignorar cachés y entornos virtuales
-*.pytest_cache/
-.tox/
-.venv/
-.env/
-
-# Ignorar archivos estáticos generados automáticamente
+# Directorio de collectstatic de Django
 staticfiles/
+
+# Subida de media (si es que la usas, ignoramos uploads)
 media/
+
+# Datos generados
+*.csv

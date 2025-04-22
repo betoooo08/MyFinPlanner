@@ -51,7 +51,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
+        'APP_DIRS': True,  # Esto permite que Django busque plantillas en las carpetas de las apps
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -64,7 +64,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 # CORRECCIÓN: Actualiza WSGI para usar el nombre correcto del módulo
 WSGI_APPLICATION = 'myFinPlanner.wsgi.application'

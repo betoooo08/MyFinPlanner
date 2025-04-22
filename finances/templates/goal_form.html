@@ -1,12 +1,49 @@
 {% extends 'shared_base.html' %}
-{% block title %}MyFinPlanner - Goal Form{% endblock %}
+{% load static %}
+
+{% block title %}MyFinPlanner – {% if form.instance.pk %}Edit Goal{% else %}Create Goal{% endif %}{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-  <h2>Add/Edit Goal</h2>
+  <h2 class="text-2xl font-bold mb-4">
+    {% if form.instance.pk %}Edit Goal{% else %}Create Goal{% endif %}
+  </h2>
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save</button>
+
+    <div class="mb-4">
+      {{ form.name.label_tag }}<br>
+      {{ form.name }} 
+      {{ form.name.errors }}
+    </div>
+
+    <div class="mb-4">
+      {{ form.description.label_tag }}<br>
+      {{ form.description }} 
+      {{ form.description.errors }}
+    </div>
+
+    <div class="mb-4">
+      {{ form.target_amount.label_tag }}<br>
+      {{ form.target_amount }} 
+      {{ form.target_amount.errors }}
+    </div>
+
+    <div class="mb-4">
+      {{ form.initial_contribution.label_tag }}<br>
+      {{ form.initial_contribution }} 
+      {{ form.initial_contribution.errors }}
+    </div>
+
+    <div class="mb-4">
+      {{ form.deadline.label_tag }}<br>
+      {{ form.deadline }} 
+      {{ form.deadline.errors }}
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      {% if form.instance.pk %}Update{% else %}Create{% endif %}
+    </button>
   </form>
 </div>
 {% endblock %}

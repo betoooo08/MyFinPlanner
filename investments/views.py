@@ -56,7 +56,7 @@ def investment_list(request):
         'daily_return_percent': daily_return_percent,
         'asset_allocation_json': json.dumps(asset_allocation),
         'portfolio_growth_json': json.dumps(portfolio_growth),
-        'active_page': 'investment_list',  # Añadido para destacar el enlace "Investments"
+        'active_page': 'investments',
     }
 
     return render(request, 'investments.html', context)
