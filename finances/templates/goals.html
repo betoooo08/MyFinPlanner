@@ -1,48 +1,237 @@
-<!-- filepath: c:\Users\alcef\MyFinPlanner\finances\templates\goals.html -->
 {% extends 'shared_base.html' %}
 {% load static %}
 
 {% block title %}MyFinPlanner - Financial Goals{% endblock %}
 
 {% block content %}
-<div class="flex flex-col gap-4">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-2xl font-bold">Financial Goals</h2>
-    <a href="{% url 'create_goal' %}" class="btn btn-primary">Add Goal</a>
+<div class="container mx-auto px-4 py-8">
+  <div class="flex flex-col gap-2 mb-6">
+    <h1 class="text-3xl font-bold tracking-tight">Financial Goals</h1>
+    <p class="text-muted-foreground">Set and track your progress towards financial milestones</p>
   </div>
 
-  <div class="grid gap-4">
+  <div class="flex justify-between items-center mb-6">
+    <div class="goal-filters">
+      <label class="goal-filter">
+        <input type="radio" name="goal-filter" value="all" checked>
+        <span>All Goals</span>
+      </label>
+      <label class="goal-filter">
+        <input type="radio" name="goal-filter" value="on-track">
+        <span>On Track</span>
+      </label>
+      <label class="goal-filter">
+        <input type="radio" name="goal-filter" value="needs-attention">
+        <span>Needs Attention</span>
+      </label>
+      <label class="goal-filter">
+        <input type="radio" name="goal-filter" value="behind-schedule">
+        <span>Behind Schedule</span>
+      </label>
+    </div>
+
+    <a href="{% url 'create_goal' %}" class="add-goal-btn">
+      <i class="fas fa-plus"></i>
+      Add Goal
+    </a>
+  </div>
+
+  <div class="goals-grid">
     {% if goals %}
       {% for goal in goals %}
-      <div class="card p-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold">{{ goal.name }}</h3>
-          <div>
-            <span class="text-sm text-muted">Target: ${{ goal.target_amount }}</span>
+        <div class="goal-card" data-goal-id="{{ goal.id }}">
+          <div class="goal-header">
+            <div>
+              <h3 class="goal-title">{{ goal.name }}</h3>
+              <p class="goal-target">
+                Target: ${{ goal.target_amount|floatformat:2 }} by
+                {{ goal.target_date|date:"m/d/Y" }}
+              </p>
+            </div>
+            <div class="goal-actions">
+              <a href="{% url 'update_goal' goal.id %}" class="goal-action-btn" title="Edit Goal">
+                <i class="fas fa-pen"></i>
+              </a>
+              <a href="{% url 'delete_goal' goal.id %}" class="goal-action-btn" title="Delete Goal">
+                <i class="fas fa-trash"></i>
+              </a>
+            </div>
+          </div>
+
+          {% if goal.percentage <= 33 %}
+            {% with status="behind-schedule" %}
+              <div class="progress-bar">
+                <div class="progress-fill {{ status }}" style="width: {{ goal.percentage }}%;"></div>
+              </div>
+            {% endwith %}
+          {% elif goal.percentage <= 66 %}
+            {% with status="needs-attention" %}
+              <div class="progress-bar">
+                <div class="progress-fill {{ status }}" style="width: {{ goal.percentage }}%;"></div>
+              </div>
+            {% endwith %}
+          {% else %}
+            {% with status="on-track" %}
+              <div class="progress-bar">
+                <div class="progress-fill {{ status }}" style="width: {{ goal.percentage }}%;"></div>
+              </div>
+            {% endwith %}
+          {% endif %}
+
+          <div class="progress-stats">
+            <div class="goal-amount-saved">
+              ${{ goal.current_amount|floatformat:2 }} saved
+            </div>
+            <div class="goal-amount-to-go">
+              ${{ goal.remaining|floatformat:2 }} to go
+            </div>
+          </div>
+
+          <div class="goal-details">
+            <p>{{ goal.description }}</p>
+          </div>
+
+          <div class="goal-actions-row">
+            <div class="goal-monthly">
+              ${{ goal.monthly_contribution|floatformat:2 }}/month
+            </div>
+            <div class="flex gap-4">
+              <button class="add-contribution-btn" data-goal-id="{{ goal.id }}">
+                Add contribution
+                <i class="fas fa-plus ml-2"></i>
+              </button>
+              <button class="view-contributions-btn" data-goal-id="{{ goal.id }}">
+                View contributions
+                <i class="fas fa-chevron-down ml-2"></i>
+              </button>
+            </div>
           </div>
         </div>
-        <p class="text-sm mt-2">Saved: ${{ goal.current_amount }} | Remaining: ${{ goal.remaining }}</p>
-        <div class="progress-container mt-2">
-          <div class="progress-bar {% if goal.percentage < 50 %}bg-secondary{% elif goal.percentage < 80 %}bg-amber-500{% else %}bg-destructive{% endif %}" style="width: {{ goal.percentage }}%"></div>
-        </div>
-        <p class="text-sm mt-2">{{ goal.percentage }}% Complete</p>
-        <div class="flex gap-2 mt-4">
-          <button class="btn btn-sm btn-outline add-contribution-btn" data-goal-id="{{ goal.id }}">Add Contribution</button>
-          <a href="{% url 'update_goal' goal.id %}" class="btn btn-sm btn-outline">Edit</a>
-          <form method="POST" action="{% url 'delete_goal' goal.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-          </form>
-        </div>
-      </div>
       {% endfor %}
     {% else %}
-      <p>No goals found. Start by adding one!</p>
+      <div class="col-span-2 text-center py-12">
+        <p class="text-gray-500 mb-4">You don't have any financial goals yet.</p>
+        <a href="{% url 'create_goal' %}" class="add-goal-btn">
+          <i class="fas fa-plus"></i>
+          Create Your First Goal
+        </a>
+      </div>
     {% endif %}
+  </div>
+
+  <!-- Goal Insights Section -->
+  <div class="insights-section">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Goal Insights</h2>
+
+      {# ▶️ Convertimos el enlace en un botón AJAX #}
+      <button
+        id="generate-insight-btn"
+        class="generate-insight-btn"
+        data-url="{% url 'ai_goal_insight' %}">
+        <i class="fas fa-robot"></i>
+        Generate AI Insight
+      </button>
+    </div>
+
+    <p class="text-muted-foreground mb-6">
+      AI-powered recommendations for your financial goals
+    </p>
+
+    {# 📦 Contenedor vacío donde inyectaremos el insight #}
+    <div id="ai-insight-container"></div>
+
+    {# ⚠️ Mantenemos tu bloque por si aún llega insight desde el servidor #}
+    {% if insight %}
+      <div class="ai-insight-container">
+        <div class="ai-insight-header">
+          <div class="ai-insight-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <h3 class="ai-insight-title">AI Financial Analysis</h3>
+        </div>
+        <div class="ai-insight-content">
+          {{ insight|linebreaks }}
+        </div>
+      </div>
+    {% endif %}
+
+    {# — El resto de tus insight-cards se queda igual — #}
+    {% if goals %}
+      <div class="insight-card">
+        <div class="insight-icon progress">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="insight-content">
+          <h4>Emergency Fund Progress</h4>
+          <p>You're making good progress on your emergency fund. Keep up the consistent contributions!</p>
+        </div>
+      </div>
+
+      <div class="insight-card">
+        <div class="insight-icon optimization">
+          <i class="fas fa-home"></i>
+        </div>
+        <div class="insight-content">
+          <h4>Savings Optimization</h4>
+          <p>Consider increasing your monthly contributions to reach your goals faster.</p>
+        </div>
+      </div>
+
+      <div class="insight-card">
+        <div class="insight-icon success">
+          <i class="fas fa-bullseye"></i>
+        </div>
+        <div class="insight-content">
+          <h4>Goal Setting Strategy</h4>
+          <p>Setting specific, measurable goals increases your chances of financial success by 42%.</p>
+        </div>
+      </div>
+
+      <a href="#" class="view-all-insights">View All Insights</a>
+    {% else %}
+      <div class="insight-card">
+        <div class="insight-icon progress">
+          <i class="fas fa-lightbulb"></i>
+        </div>
+        <div class="insight-content">
+          <h4>Getting Started with Goals</h4>
+          <p>Create your first financial goal to start tracking your progress and receive personalized insights.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Contribution Modal (solo UNA vez) -->
+<div class="contribution-modal" id="contributionModal">
+  <div class="contribution-modal-content">
+    <button class="contribution-modal-close" id="closeModal">&times;</button>
+    <h3 class="contribution-modal-title">Add Contribution</h3>
+    <form class="contribution-form" id="contributionForm">
+      {% csrf_token %}
+      <input type="hidden" id="goalId" name="goalId">
+      <div class="contribution-form-group">
+        <label for="contributionAmount" class="contribution-form-label">Amount ($)</label>
+        <input type="number" id="contributionAmount" name="amount"
+               class="contribution-form-input" step="0.01" min="0.01" required>
+      </div>
+      <div class="contribution-error" id="contributionError"></div>
+      <button type="submit" class="contribution-form-submit">Add Contribution</button>
+    </form>
+  </div>
+</div>
+
+<!-- View Contributions Modal -->
+<div class="contribution-modal" id="contributionsListModal">
+  <div class="contribution-modal-content">
+    <button class="contribution-modal-close" id="closeContributionsListModal">&times;</button>
+    <h3 class="contribution-modal-title">Contributions</h3>
+    <div id="contributionsList" class="space-y-3"></div>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'shared/goals.js' %}"></script>
+  <script src="{% static 'shared/goals.js' %}"></script>
 {% endblock %}

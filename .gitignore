@@ -1,4 +1,54 @@
-# Ignorar carpetas de caché de Python
+# Byte‑compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+
+# Base de datos SQLite
+db.sqlite3
+
+# Migraciones de Django (ignoramos todo salvo el __init__.py)
+**/migrations/*.py
+!**/migrations/__init__.py
+**/migrations/*.py[cod]
+
+# Archivos de entorno / configuración local
+.env
+.env.*
+.envrc
+api_keys.env
+
+# Cachés de test, cobertura, dependencias
+.pytest_cache/
+.coverage
+*.cover
+*.egg-info/
+*.eggs
+*.manifest
+*.spec
+
+# Logs
+*.log
+
+# Entornos virtuales y caches de empaquetado
+.venv/
+venv/
+.env/
+to*
+pip-wheel-metadata/
+
+# Configuraciones de editor/IDE
+.vscode/
+.idea/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Directorio de collectstatic de Django
+staticfiles/
+
+# Subida de media (si es que la usas, ignoramos uploads)
+media/
+
+# Datos generados
+*.csv

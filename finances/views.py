@@ -7,24 +7,17 @@ from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from django.conf import settings
+from django.http import JsonResponse
+from django.core.exceptions import ValidationError
+import finnhub
 import datetime
 import json
 import requests
 from decimal import Decimal
-import finnhub
-from django.http import JsonResponse
-from django.core.exceptions import ValidationError
-
-# Importar modelos de la app finances
-from .models import Transaction, Budget, Goal, Report
-# Importar modelos y formularios de la app investments
-from investments.models import Investment, InvestmentSymbol
-
-# Importar modelo GoalContribution
-from .models import GoalContribution
-from investments.forms import InvestmentForm
-# Formularios propios de finances
+from .models import Transaction, Budget, Goal, Report, GoalContribution
 from .forms import TransactionForm, BudgetForm, GoalForm, ReportForm
+from investments.models import Investment, InvestmentSymbol
+from investments.forms import InvestmentForm
 
 # Configurar el cliente de Finnhub
 finnhub_client = finnhub.Client(api_key=settings.FINNHUB_API_KEY)
@@ -146,7 +139,7 @@ def transaction_list(request):
     transactions = Transaction.objects.filter(user=request.user)
     return render(request, 'transactions.html', {
         'transactions': transactions,
-        'active_page': 'transaction_list'
+        'active_page': 'transactions'
     })
 
 @login_required
@@ -197,7 +190,7 @@ def budget_list(request):
 
     return render(request, 'budgets.html', {
         'budgets': budgets,
-        'active_page': 'budget_list'
+        'active_page': 'budgets'
     })
 
 @login_required
@@ -247,23 +240,53 @@ def delete_budget(request, pk):
 # ------------------------------------------------------------------
 @login_required
 def goal_list(request):
-    goals = Goal.objects.filter(user=request.user)
+    goals = Goal.objects.filter(user=request.user).order_by('deadline')
     return render(request, 'goals.html', {
         'goals': goals,
-        'active_page': 'goal_list'
+        'active_page': 'goals'
     })
 
+@login_required
+def ai_goal_insight(request):
+    # 1) Siempre vuelvo a traer las metas
+    goals = Goal.objects.filter(user=request.user).order_by('deadline')
+    # 2) Aquí tu llamada a la IA, por ejemplo:
+    # insight = run_your_ai_analysis(goals)
+    insight = "Aquí iría tu análisis generado por IA…"  
+    # 3) Renderizo de nuevo con goals + insight
+    return render(request, 'goals.html', {
+        'goals':       goals,
+        'insight':     insight,
+        'active_page': 'goals'
+    })
+    
 @login_required
 def create_goal(request):
     if request.method == 'POST':
         form = GoalForm(request.POST)
         if form.is_valid():
+            # 1) Guardamos la meta sin aporte inicial
             goal = form.save(commit=False)
             goal.user = request.user
+            goal.current_amount = Decimal('0')
             goal.save()
+
+            # 2) Si vino aporte inicial, lo grabamos y actualizamos current_amount
+            initial = form.cleaned_data.get('initial_contribution') or Decimal('0')
+            if initial > 0:
+                GoalContribution.objects.create(
+                    goal=goal,
+                    amount=initial,
+                    date=timezone.now()
+                )
+                goal.current_amount = initial
+                goal.save(update_fields=['current_amount'])
+
+            messages.success(request, "Meta creada correctamente.")
             return redirect('goal_list')
     else:
         form = GoalForm()
+
     return render(request, 'goal_form.html', {
         'form': form,
         'active_page': 'goal_list'
@@ -297,53 +320,42 @@ def delete_goal(request, pk):
     
 @login_required
 def add_contribution(request, pk):
-    """
-    Vista para añadir una contribución a una meta.
-    """
     goal = get_object_or_404(Goal, pk=pk, user=request.user)
-
     if request.method == 'POST':
-        try:
-            # Manejar solicitudes JSON
-            if request.content_type == 'application/json':
-                import json
-                body = json.loads(request.body)
-                amount = Decimal(body.get('amount', 0))
-            else:
-                amount = Decimal(request.POST.get('amount', 0))
+        data = json.loads(request.body)
+        amount = Decimal(str(data.get('amount', 0)))
+        if amount <= 0:
+            return JsonResponse({'success': False, 'error': 'El monto debe ser mayor que 0.'})
+        if (goal.current_amount + amount) > goal.target_amount:
+            return JsonResponse({'success': False, 'error': 'La contribución excede el monto objetivo.'})
 
-            if amount <= 0:
-                return JsonResponse({'success': False, 'error': 'El monto debe ser mayor a 0.'})
+        # guardamos la nueva contribución
+        GoalContribution.objects.create(goal=goal, amount=amount, date=timezone.now())
 
-            # Validar si la meta ya está completa
-            if goal.current_amount >= goal.target_amount:
-                return JsonResponse({'success': False, 'error': 'La meta ya está completa. No se pueden añadir más contribuciones.'})
+        # recalc current_amount desde contribuciones
+        total = GoalContribution.objects.filter(goal=goal).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        goal.current_amount = total
+        goal.save(update_fields=['current_amount'])
 
-            # Validar si la contribución excede el monto restante
-            if goal.current_amount + amount > goal.target_amount:
-                exceso = (goal.current_amount + amount) - goal.target_amount
-                return JsonResponse({
-                    'success': False,
-                    'error': f'La contribución excede el monto objetivo de la meta por ${exceso:.2f}.',
-                })
+        pct = float(min(100, (total / goal.target_amount) * 100))
+        remaining = float(goal.target_amount - total)
+        return JsonResponse({
+            'success':    True,
+            'new_amount': float(total),
+            'percentage': pct,
+            'remaining':  remaining,
+        })
+    return JsonResponse({'success': False, 'error': 'Método no válido.'})
 
-            # Crear la contribución y actualizar el progreso de la meta
-            GoalContribution.objects.create(goal=goal, amount=amount, date=timezone.now())
-            goal.current_amount += amount
-            goal.save()
-
-            # Retornar una respuesta JSON con los datos actualizados
-            return JsonResponse({
-                'success': True,
-                'new_amount': float(goal.current_amount),
-                'percentage': goal.percentage,
-                'remaining': float(goal.remaining),
-            })
-
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-
-    return JsonResponse({'success': False, 'error': 'Método no permitido.'})
+@login_required
+def get_contributions(request, pk):
+    goal = get_object_or_404(Goal, pk=pk, user=request.user)
+    contributions = GoalContribution.objects.filter(goal=goal).order_by('-date')
+    data = [
+        {'amount': float(c.amount), 'date': c.date.strftime('%Y-%m-%d')}
+        for c in contributions
+    ]
+    return JsonResponse({'success': True, 'contributions': data})
 # ------------------------------------------------------------------
 # Vistas de Reports
 # ------------------------------------------------------------------
@@ -352,7 +364,7 @@ def report_list(request):
     reports = Report.objects.filter(user=request.user)
     return render(request, 'reports.html', {
         'reports': reports,
-        'active_page': 'report_list'
+        'active_page': 'reports'
     })
 
 @login_required
@@ -377,29 +389,27 @@ def create_report(request):
 @login_required
 def investment_list(request):
     investments = Investment.objects.filter(user=request.user)
+
+    # Calcular métricas del portafolio
     total_portfolio_value = sum(inv.value for inv in investments)
+    total_gain_value = sum((inv.current_price - inv.purchase_price) * inv.shares for inv in investments)
+    total_purchase = sum(inv.purchase_price * inv.shares for inv in investments)
+    total_gain_percent = (total_gain_value / total_purchase * 100) if total_purchase else Decimal('0')
+    # Retorno diario (placeholder, podrías enriquecer)
     daily_return = Decimal('0')
     daily_return_percent = Decimal('0')
-    total_gain_value = Decimal('0')
-    total_purchase = Decimal('0')
-    for inv in investments:
-        gain = (inv.current_price - inv.purchase_price) * inv.shares
-        total_gain_value += gain
-        total_purchase += (inv.purchase_price * inv.shares)
-    total_gain_percent = (total_gain_value / total_purchase * 100) if total_purchase else Decimal('0')
-    total_portfolio_change = Decimal('0')  # Ajusta la lógica según se requiera
+    total_portfolio_change = Decimal('0')  # Si tienes lógica histórica, sustitúyela aquí
 
-    investments_list = []
-    for inv in investments:
-        investments_list.append({
-            "symbol": inv.symbol.symbol,
-            "symbol_type": inv.symbol.type,
-            "name": inv.name,
-            "shares": float(inv.shares),
-            "purchase_price": float(inv.purchase_price),
-            "current_price": float(inv.current_price),
-            "value": float(inv.value),
-        })
+    # Prepara JSON para gráficos
+    investments_list = [{
+        "symbol": inv.symbol.symbol,
+        "symbol_type": inv.symbol.type,
+        "name": inv.name,
+        "shares": float(inv.shares),
+        "purchase_price": float(inv.purchase_price),
+        "current_price": float(inv.current_price),
+        "value": float(inv.value),
+    } for inv in investments]
     investments_json = json.dumps(investments_list)
 
     context = {
@@ -413,9 +423,10 @@ def investment_list(request):
         'total_gain_percent': total_gain_percent,
         'total_portfolio_change': total_portfolio_change,
         'investments_json': investments_json,
-        'active_page': 'investment_list',
+        'active_page': 'investments',   # <-- para que el link quede activo
     }
     return render(request, 'investments.html', context)
+
 
 @login_required
 def add_investment(request):
@@ -423,101 +434,104 @@ def add_investment(request):
         form = InvestmentForm(request.POST)
         if form.is_valid():
             investment = form.save(commit=False)
-            investment.user = request.user  # Asignar el usuario autenticado
-            investment.symbol, _ = InvestmentSymbol.objects.get_or_create(symbol=form.cleaned_data['symbol'])
+            investment.user = request.user
+            investment.symbol, _ = InvestmentSymbol.objects.get_or_create(
+                symbol=form.cleaned_data['symbol']
+            )
             investment.save()
+            messages.success(request, "Investment added successfully.")
             return redirect('investment_list')
     else:
         form = InvestmentForm()
-    return render(request, 'investment_form.html', {'form': form})
+    return render(request, 'investment_form.html', {
+        'form': form,
+        'active_page': 'investments'
+    })
+
 
 @login_required
 def delete_investment(request, pk):
-    investment = get_object_or_404(Investment, pk=pk)
+    investment = get_object_or_404(Investment, pk=pk, user=request.user)
     if request.method == 'POST':
         investment.delete()
+        messages.success(request, "Investment deleted.")
         return redirect('investment_list')
     return render(request, 'investment_confirm_delete.html', {
         'investment': investment,
-        'active_page': 'investment_list'
+        'active_page': 'investments'
     })
+
 
 @login_required
 def update_symbols(request):
     FINNHUB_API_KEY = settings.FINNHUB_API_KEY
     stock_url = f"https://finnhub.io/api/v1/stock/symbol?exchange=US&token={FINNHUB_API_KEY}"
-
     try:
         stock_response = requests.get(stock_url).json()
-        bulk_create_list = []
-
-        for stock in stock_response[:100]:  # Limitar a los primeros 100 símbolos
+        bulk = []
+        for stock in stock_response[:100]:
             if not InvestmentSymbol.objects.filter(symbol=stock['symbol']).exists():
-                bulk_create_list.append(InvestmentSymbol(
+                bulk.append(InvestmentSymbol(
                     symbol=stock['symbol'],
-                    name=stock.get('description', 'Unknown'),
+                    name=stock.get('description','Unknown'),
                     type='Stock'
                 ))
-
-        if bulk_create_list:
-            InvestmentSymbol.objects.bulk_create(bulk_create_list)
-            messages.success(request, f'Successfully added {len(bulk_create_list)} new stocks.')
+        if bulk:
+            InvestmentSymbol.objects.bulk_create(bulk)
+            messages.success(request, f"Added {len(bulk)} new symbols.")
         else:
-            messages.info(request, "No new stocks were added.")
-
+            messages.info(request, "No new symbols found.")
     except Exception as e:
-        messages.error(request, f'Error updating symbols: {str(e)}')
-
+        messages.error(request, f"Error updating symbols: {e}")
     return redirect('investment_list')
+
 
 @login_required
 def update_price(request):
-    updated_count = 0
-    for investment in Investment.objects.all():
-        symbol = investment.symbol
-        new_price = get_stock_price(symbol)
+    updated = 0
+    for inv in Investment.objects.filter(user=request.user):
+        new_price = get_stock_price(inv.symbol)
         if new_price > 0:
-            investment.current_price = new_price
-            investment.save()
-            updated_count += 1
-    messages.success(request, f'Successfully updated prices for {updated_count} investments.')
+            inv.current_price = new_price
+            inv.save()
+            updated += 1
+    messages.success(request, f"Updated prices for {updated} investments.")
     return redirect('investment_list')
 
+
 def get_stock_price(symbol):
-    """Obtiene el precio actual de un símbolo desde Finnhub"""
     try:
-        FINNHUB_API_KEY = settings.FINNHUB_API_KEY
-        url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
-        response = requests.get(url).json()
-        return Decimal(str(response.get("c", 0)))  # "c" es el precio actual
-    except requests.exceptions.RequestException as e:
-        print(f"Error de red al obtener precio para {symbol}: {e}")
+        url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={settings.FINNHUB_API_KEY}"
+        resp = requests.get(url).json()
+        return Decimal(str(resp.get("c", 0)))
     except Exception as e:
-        print(f"Error al procesar precio para {symbol}: {e}")
-    return Decimal('0')
+        print(f"Error fetching price for {symbol}: {e}")
+        return Decimal('0')
+
 
 @login_required
 def symbol_search(request):
-    query = request.GET.get('q', '')
+    q = request.GET.get('q','')
     results = []
-    if query:
+    if q:
         try:
-            data = finnhub_client.symbol_lookup(query)
-            results = [{'symbol': item['symbol'], 'name': item['description']} for item in data.get('result', [])]
+            data = finnhub_client.symbol_lookup(q).get('result',[])
+            results = [{'symbol': it['symbol'], 'name': it['description']} for it in data]
         except Exception as e:
-            print(f"Error al buscar símbolos: {e}")
+            print(f"Symbol search error: {e}")
     return JsonResponse(results, safe=False)
 
-@login_required
+
+@login_required        # <-- añadimos login_required aquí también
 def get_price(request, symbol):
     data = finnhub_client.quote(symbol)
     if 'c' in data:
-        price = data['c']
-        return JsonResponse({'price': price})
-    else:
-        return JsonResponse({'error': 'Symbol not found'}, status=404)
+        return JsonResponse({'price': data['c']})
+    return JsonResponse({'error': 'Symbol not found'}, status=404)
+
 
 def signup(request):
+    # Si te está quedando aquí y no importa, podrías moverlo a accounts/views.py
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -526,4 +540,6 @@ def signup(request):
             return redirect('dashboard')
     else:
         form = UserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
+    return render(request, 'registration/signup.html', {
+        'form': form
+    })
