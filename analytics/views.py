@@ -1,5 +1,3 @@
-# analytics/views.py
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -91,16 +89,28 @@ def AI_Goal_Insight(request):
     for row in contributions_data:
         contributions_text += ", ".join(row) + "\n"
 
-    # Llamada a OpenAI
     prompt = f"""
-You are a friendly yet insightful personal finance advisor...
+You are a friendly yet insightful personal finance advisor. Your task is to analyze a user's financial goals and the historical contributions made toward those goals. Based on the data provided below, generate a detailed yet simple-to-understand insight for the user.
+
+Use the following approach:
+1. Carefully review the financial goals: include the target amount, current amount, deadline, and description.
+2. Analyze the history of contributions for each goal (amount and date).
+3. For each goal, evaluate if the user is on track to reach it by the deadline based on their current progress and contribution patterns.
+4. If the user is behind, gently explain why and give motivational yet realistic suggestions to improve (e.g. increasing monthly savings, extending the deadline, or adjusting the goal).
+5. If the user is doing well, offer praise and encouragement.
+6. Use financial-related emojis (💰📈⏳✅❗) to make your response more engaging.
+7. Avoid overly technical language; your tone should be clear, supportive, and beginner-friendly.
+8. If appropriate, calculate how much the user would need to contribute monthly (or weekly) to reach their goal in time.
+9. If the provided data is empty or no goals/contributions exist, kindly inform the user that no financial goals or contributions have been set yet, and encourage them to create one to start planning for their future.
+
+Now analyze the following user data and generate personalized insights:
+
 {goals_text}
 
 {contributions_text}
 """
     insight = get_completion(prompt)
 
-    # Guardar en base de datos
     if goals_data:
         Insight.objects.create(
             user=request.user,
@@ -122,7 +132,6 @@ You are a friendly yet insightful personal finance advisor...
 def Export_Transactions_and_Budgets_to_CSV(request):
     temp_dir = tempfile.gettempdir()
 
-    # Transacciones
     transactions_file_path = os.path.join(temp_dir, 'Transactions.csv')
     with open(transactions_file_path, 'w', newline='', encoding='utf-8') as transactions_file:
         writer = csv.writer(transactions_file)
@@ -133,11 +142,10 @@ def Export_Transactions_and_Budgets_to_CSV(request):
                 transaction.amount,
                 transaction.category,
                 transaction.description,
-                transaction.type,
+                transaction.transaction_type,
                 transaction.account
             ])
 
-    # Presupuestos
     budgets_file_path = os.path.join(temp_dir, 'Budgets.csv')
     with open(budgets_file_path, 'w', newline='', encoding='utf-8') as budgets_file:
         writer = csv.writer(budgets_file)
@@ -157,7 +165,6 @@ def Export_Transactions_and_Budgets_to_CSV(request):
 
 @login_required
 def AI_Transactions_and_Budgets_Insight(request):
-    # Si no hay datos, renderizar sin OpenAI
     if not Transaction.objects.filter(user=request.user).exists() and not Budget.objects.filter(user=request.user).exists():
         reports = Report.objects.filter(user=request.user)
         return render(request, 'reports.html', {
@@ -165,11 +172,9 @@ def AI_Transactions_and_Budgets_Insight(request):
             'active_page': 'report_list'
         })
 
-    # Exportar CSV
     Export_Transactions_and_Budgets_to_CSV(request)
     temp_dir = tempfile.gettempdir()
 
-    # Leer transacciones
     transactions_path = os.path.join(temp_dir, 'Transactions.csv')
     transactions_data = []
     with open(transactions_path, 'r', encoding='utf-8') as t_file:
@@ -182,7 +187,6 @@ def AI_Transactions_and_Budgets_Insight(request):
     for row in transactions_data:
         transactions_text += ", ".join(row) + "\n"
 
-    # Leer presupuestos
     budgets_path = os.path.join(temp_dir, 'Budgets.csv')
     budgets_data = []
     with open(budgets_path, 'r', encoding='utf-8') as b_file:
@@ -195,16 +199,27 @@ def AI_Transactions_and_Budgets_Insight(request):
     for row in budgets_data:
         budgets_text += ", ".join(row) + "\n"
 
-    # Llamada a OpenAI
     prompt = f"""
-You are a helpful and insightful personal finance advisor...
+You are a helpful and insightful personal finance advisor. Your task is to analyze a user's financial transactions and their current budget distribution. Based on the data provided below, generate personalized and easy-to-understand recommendations for the user.
+
+Use the following approach:
+1. Review the transactions, including income and expenses, grouped by category.
+2. Cross-reference the transactions with the user's budgets: check if they are staying within the limits, overspending, or underutilizing certain categories.
+3. Point out any anomalies or unusual spending behavior (e.g., unusually high spending in a category compared to previous trends).
+4. If the user receives income, suggest how to best distribute it among their budgets (e.g., savings, food, transportation) based on their recent spending patterns and needs.
+5. Highlight areas where the user may need to increase or decrease their budgets.
+6. Provide motivating tips on how to improve spending habits or stick to budgets more effectively.
+7. Use financial-related emojis (💸📈💡🚨💰) to make your advice more engaging.
+8. Avoid technical jargon; use a clear, friendly tone that anyone can understand.
+
+Now analyze the following user data and generate insightful recommendations:
+
 {transactions_text}
 
 {budgets_text}
 """
     insight = get_completion(prompt)
 
-    # Guardar en base de datos
     if transactions_data or budgets_data:
         Insight.objects.create(
             user=request.user,

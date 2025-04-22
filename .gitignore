@@ -1,23 +1,23 @@
-# Byte‑compiled / optimized / DLL files
+#Byte‑compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Base de datos SQLite
+#Base de datos SQLite
 db.sqlite3
 
-# Migraciones de Django (ignoramos todo salvo el __init__.py)
+#Migraciones de Django (ignoramos todo salvo el __init__.py)
 **/migrations/*.py
 !**/migrations/__init__.py
 **/migrations/*.py[cod]
 
-# Archivos de entorno / configuración local
+#Archivos de entorno / configuración local
 .env
 .env.*
 .envrc
 api_keys.env
 
-# Cachés de test, cobertura, dependencias
+#Cachés de test, cobertura, dependencias
 .pytest_cache/
 .coverage
 *.cover
@@ -26,29 +26,29 @@ api_keys.env
 *.manifest
 *.spec
 
-# Logs
+#Logs
 *.log
 
-# Entornos virtuales y caches de empaquetado
+#Entornos virtuales y caches de empaquetado
 .venv/
 venv/
 .env/
 to*
 pip-wheel-metadata/
 
-# Configuraciones de editor/IDE
+#Configuraciones de editor/IDE
 .vscode/
 .idea/
 
-# Archivos del sistema operativo
+#Archivos del sistema operativo
 .DS_Store
 Thumbs.db
 
-# Directorio de collectstatic de Django
+#Directorio de collectstatic de Django
 staticfiles/
 
-# Subida de media (si es que la usas, ignoramos uploads)
+#Subida de media (si es que la usas, ignoramos uploads)
 media/
 
-# Datos generados
+#Datos generados
 *.csv
