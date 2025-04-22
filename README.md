@@ -21,8 +21,8 @@ Before starting the project, make sure you have installed:
 
 - Python 3.10+ 👉 [Download here](https://www.python.org/downloads/)
 - Git 👉 [Download here](https://git-scm.com/)
-- Virtualenv (optional but recommended)  
-
+- Virtualenv
+  
 ### 2️⃣ Clone the repository
 
 ```bash
@@ -35,15 +35,26 @@ cd MyFinPlanner
 ```bash
 pip install -r requirements.txt
 ```
+### 4️⃣ 🔧 Create and configure the `.env` file
 
-### 4️⃣ Apply Migrations and prepare the database
+You must create a `.env` file in the root of the project and add your API key for OpenAI:
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+```
+🔐 This key is required for enabling the **AI financial assistant** (MyFinancePal).
+Get your API key at https://platform.openai.com
+
+Important: Do NOT commit your .env file to version control, use a `.gitignore` file
+
+### 5️⃣ Apply Migrations and prepare the database
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 5️⃣ Initialize the server
+### 6️⃣ Initialize the server
 
 ```bash
 python manage.py runserver
