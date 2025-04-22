@@ -135,33 +135,40 @@ def Export_Transactions_and_Budgets_to_CSV(request):
     transactions_file_path = os.path.join(temp_dir, 'Transactions.csv')
     with open(transactions_file_path, 'w', newline='', encoding='utf-8') as transactions_file:
         writer = csv.writer(transactions_file)
-        writer.writerow(['Date', 'Amount', 'Category', 'Description', 'Type', 'Account'])
+        writer.writerow([
+            'Date', 'Amount', 'Category', 'Description',
+            'Type', 'Merchant', 'Created At'
+        ])
         for transaction in Transaction.objects.filter(user=request.user):
             writer.writerow([
                 transaction.date,
                 transaction.amount,
-                transaction.category,
+                transaction.category.name,
                 transaction.description,
                 transaction.transaction_type,
-                transaction.account
+                transaction.merchant,
+                transaction.created_at,
             ])
 
     budgets_file_path = os.path.join(temp_dir, 'Budgets.csv')
     with open(budgets_file_path, 'w', newline='', encoding='utf-8') as budgets_file:
         writer = csv.writer(budgets_file)
-        writer.writerow(['Name', 'Amount', 'Spent', 'Remaining', 'Start Date', 'End Date', 'Category'])
+        writer.writerow([
+            'Category', 'Amount', 'Spent',
+            'Remaining', 'Period', 'Alert Threshold'
+        ])
         for budget in Budget.objects.filter(user=request.user):
             writer.writerow([
-                budget.name,
+                budget.category.name,
                 budget.amount,
                 budget.spent,
                 budget.remaining,
-                budget.start_date,
-                budget.end_date,
-                budget.category
+                budget.period,
+                budget.alert_threshold,
             ])
-
-    return HttpResponse(f"Archivos generados en: {transactions_file_path} y {budgets_file_path}")
+    return HttpResponse(
+        f"Archivos generados en: {transactions_file_path} y {budgets_file_path}"
+    )
 
 @login_required
 def AI_Transactions_and_Budgets_Insight(request):
@@ -234,5 +241,5 @@ Now analyze the following user data and generate insightful recommendations:
         'budgets_data': budgets_data,
         'transactions_headers': transactions_headers,
         'budgets_headers': budgets_headers,
-        'active_page': 'report_list',
+        'active_page': 'reports',
     })
