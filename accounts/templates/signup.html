@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign Up - MyFinPlanner{% endblock %}
+
+{% block content %}
+<div class="flex-1 flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+          <a href="/" class="inline-flex items-center gap-2">
+              <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                  <i class="fas fa-wallet"></i>
+              </div>
+              <span class="text-xl font-bold text-blue-600">MyFinPlanner</span>
+          </a>
+          <h1 class="text-2xl font-bold mt-6">Create your account</h1>
+          <p class="text-gray-600 mt-2">Start your financial journey today</p>
+      </div>
+      
+      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+          {% if messages %}
+              <div class="mb-4">
+                  {% for message in messages %}
+                      <div class="p-4 mb-4 {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} rounded">
+                          {{ message }}
+                      </div>
+                  {% endfor %}
+              </div>
+          {% endif %}
+          
+          <form method="post" class="space-y-4">
+              {% csrf_token %}
+              
+              {% if form.errors %}
+                <div class="text-red-600 text-sm">
+                    {{ form.errors }}
+                </div>
+              {% endif %}
+              
+              <div class="space-y-2">
+                  <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                  <input id="username" name="username" type="text" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              </div>
+              
+              <div class="space-y-2">
+                  <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                  <input id="email" name="email" type="email" placeholder="name@example.com" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                      <label for="first_name" class="block text-sm font-medium text-gray-700">First name</label>
+                      <input id="first_name" name="first_name" type="text" required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  </div>
+                  <div class="space-y-2">
+                      <label for="last_name" class="block text-sm font-medium text-gray-700">Last name</label>
+                      <input id="last_name" name="last_name" type="text" required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  </div>
+              </div>
+              
+              <div class="space-y-2">
+                  <label for="password1" class="block text-sm font-medium text-gray-700">Password</label>
+                  <input id="password1" name="password1" type="password" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <p class="text-xs text-gray-500">
+                      Must be at least 8 characters and include a number and a special character.
+                  </p>
+              </div>
+              
+              <div class="space-y-2">
+                  <label for="password2" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                  <input id="password2" name="password2" type="password" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              </div>
+              
+              <div class="flex items-center space-x-2">
+                  <input type="checkbox" id="terms" name="terms" required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                  <label for="terms" class="text-sm font-normal text-gray-700">
+                      I agree to the
+                      <a href="/terms" class="text-blue-600 hover:underline">
+                          Terms of Service
+                      </a>
+                      and
+                      <a href="/privacy" class="text-blue-600 hover:underline">
+                          Privacy Policy
+                      </a>
+                  </label>
+              </div>
+              
+              <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                  Create Account
+              </button>
+          </form>
+          
+          <div class="mt-6 text-center text-sm">
+              <p class="text-gray-600">
+                  Already have an account?
+                  <a href="{% url 'login' %}" class="text-blue-600 hover:underline font-medium">
+                      Sign in
+                  </a>
+              </p>
+          </div>
+      </div>
+  </div>
+</div>
+{% endblock %}

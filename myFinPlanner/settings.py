@@ -111,7 +111,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuración de autenticación
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/finances/'  # Cambia esto a la URL de tu dashboard o página principal después de iniciar sesión
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Configuración de mensajes
@@ -122,3 +122,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # API Keys
 FINNHUB_API_KEY = "cvbnah9r01qob7uep660cvbnah9r01qob7uep66g"
+
+AUTH_USER_MODEL = 'accounts.CustomUser'  

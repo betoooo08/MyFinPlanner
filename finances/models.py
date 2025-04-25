@@ -4,6 +4,8 @@ from django.db.models.signals import post_save
 from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.conf import settings
+
 
 class Category(models.Model):
     TYPE_CHOICES = [
@@ -30,7 +32,7 @@ class Transaction(models.Model):
         ('expense', 'Expense'),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=255)
     # Cambiamos el campo category de CharField a ForeignKey
@@ -50,7 +52,7 @@ class Budget(models.Model):
         ('yearly', 'Yearly'),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     # Cambiamos el campo category de CharField a ForeignKey
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -75,7 +77,7 @@ class Budget(models.Model):
 
 
 class Goal(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     current_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -131,7 +133,7 @@ class Report(models.Model):
         ('tax', 'Tax Summary'),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)

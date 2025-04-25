@@ -19,5 +19,5 @@ urlpatterns = [
     path('goals/ai-insight/', views.ai_goal_insight, name='ai_goal_insight'),
     path('reports/', views.report_list, name='report_list'),
     path('reports/new/', views.create_report, name='create_report'),
-    path('signup/', views.signup, name='signup'),
+   
 ]

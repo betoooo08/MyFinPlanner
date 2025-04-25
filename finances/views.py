@@ -530,16 +530,3 @@ def get_price(request, symbol):
     return JsonResponse({'error': 'Symbol not found'}, status=404)
 
 
-def signup(request):
-    # Si te está quedando aquí y no importa, podrías moverlo a accounts/views.py
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('dashboard')
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/signup.html', {
-        'form': form
-    })

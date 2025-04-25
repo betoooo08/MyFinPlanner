@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+from .forms import CustomUserCreationForm
 
 def home_view(request):
     return render(request, 'home.html', {
@@ -9,14 +10,18 @@ def home_view(request):
 
 def signup_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return redirect('home')  # Cambia 'home' por la URL de tu página principal
+            login(request, user)  # Inicia sesión automáticamente
+            messages.success(request, 'Your account has been created successfully!')
+            return redirect('dashboard')
+        else:
+            print(form.errors)  # Esto imprimirá los errores en la consola
     else:
-        form = UserCreationForm()
-    return render(request, 'accounts/signup.html', {'form': form})
+        form = CustomUserCreationForm()
+    return render(request, 'signup.html', {'form': form})
 
 def login_view(request):
-    return render(request, 'accounts/login.html')
+    return render(request, 'login.html')
+
