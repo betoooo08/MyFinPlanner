@@ -9,39 +9,35 @@
 <section class="bg-gradient-blue text-white py-20">
     <div class="container mx-auto px-4">
         <div class="grid md:grid-cols-2 gap-12 items-center">
-            <!-- Texto a la izquierda -->
-            <div class="space-y-6">
-                <h1 class="text-4xl md:text-5xl font-bold leading-tight">
-                    Take Control of Your Financial Future
-                </h1>
-                <p class="text-xl text-blue-100">
-                    Smart budgeting, expense tracking, and investment management all in one place.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="{% url 'signup' %}" class="px-6 py-3 bg-white text-blue-600 rounded-md font-medium hover:bg-blue-50 transition-colors inline-flex items-center justify-center">
-                        Get Started Free <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                    <a href="#demo" class="px-6 py-3 border border-white text-white rounded-md font-medium hover:bg-blue-700 transition-colors inline-flex items-center justify-center">
-                        See How It Works
-                    </a>
-                </div>
-            </div>
-
-            <div class="hidden md:block">
-                <div class="relative flex items-center justify-center">
-                    <!-- Contenedor del cuadro -->
-                    <div class="relative" style="z-index: 10;">
-                        <img 
-                            src="{% static 'images/Logo.png' %}" 
-                            alt="MyFinPlanner Logo" 
-                            class="rounded-lg shadow-lg"
-                            style="width: 200px; height: auto;"
-                        />
-                    </div>
-                </div>
-            </div>
+            <!-- IZQUIERDA: solo texto y botones -->
+      <div class="space-y-6">
+        <h1 class="text-4xl md:text-5xl font-bold leading-tight">
+          Take Control of Your Financial Future
+        </h1>
+        <p class="text-xl text-blue-100">
+          Smart budgeting, expense tracking, and investment management all in one place.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="{% url 'signup' %}" class="px-6 py-3 bg-white text-blue-600 rounded-md font-medium hover:bg-blue-50 transition-colors inline-flex items-center justify-center">
+            Get Started Free <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+          <a href="#demo" class="px-6 py-3 border border-white text-white rounded-md font-medium hover:bg-blue-700 transition-colors inline-flex items-center justify-center">
+            See How It Works
+          </a>
         </div>
+      </div>
+
+      <!-- DERECHA: imagen giratoria ocupando todo el espacio azul -->
+      <div class="flex items-center justify-center">
+        <img
+          src="{% static 'images/dinero.png' %}"
+          alt="Dinero girando"
+          class="w-3/4 md:w-full animate-spin-slow"
+        />
+      </div>
+
     </div>
+  </div>
 </section>
 
 <!-- Features Section -->
