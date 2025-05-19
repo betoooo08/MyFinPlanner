@@ -123,4 +123,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # API Keys
 FINNHUB_API_KEY = "cvbnah9r01qob7uep660cvbnah9r01qob7uep66g"
 
-AUTH_USER_MODEL = 'accounts.CustomUser'  
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Configuración de correo electrónico (para desarrollo)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+
+# indica a Django que la URL de login es /login/
+LOGIN_URL = '/login/'
