@@ -12,4 +12,7 @@ urlpatterns = [
         views.AI_Transactions_and_Budgets_Insight,
         name='ai_transactions_and_budgets_insight'
     ),
+    # En tu archivo urls.py
+path('reports/export/pdf/', views.export_financial_report_pdf, name='export_financial_report_pdf'),
+path('reports/export/csv/', views.export_financial_report_csv, name='export_financial_report_csv'),
 ]

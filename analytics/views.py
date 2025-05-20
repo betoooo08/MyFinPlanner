@@ -7,7 +7,19 @@ from finances.models import Goal, GoalContribution, Transaction, Budget, Report
 from .models import Insight
 from dotenv import load_dotenv
 import os
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from openai import OpenAI
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from io import BytesIO
+from django.conf import settings
+from datetime import datetime
+
+
 
 # Cargar el archivo .env desde la ruta específica
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../api_keys.env'))
@@ -243,3 +255,231 @@ Now analyze the following user data and generate insightful recommendations:
         'budgets_headers': budgets_headers,
         'active_page': 'reports',
     })
+
+
+
+
+
+@login_required
+def export_financial_report_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    filename = f"financial_report_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    writer = csv.writer(response)
+    
+    # Encabezado del reporte
+    writer.writerow(['MyFinPlanner - Financial Report'])
+    writer.writerow([f'Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M")}'])
+    writer.writerow([f'User: {request.user.username}'])
+    writer.writerow([])
+
+    # Transactions
+    writer.writerow(['TRANSACTIONS'])
+    writer.writerow(['Date', 'Amount', 'Category', 'Description', 'Type', 'Merchant', 'Created At'])
+    transactions = Transaction.objects.filter(user=request.user)
+    if transactions:
+        for t in transactions:
+            writer.writerow([
+                t.date.strftime('%Y-%m-%d'), 
+                f"${t.amount:.2f}", 
+                t.category.name, 
+                t.description,
+                t.transaction_type, 
+                t.merchant, 
+                t.created_at.strftime('%Y-%m-%d %H:%M')
+            ])
+    else:
+        writer.writerow(['No transactions found.'])
+
+    # Budgets
+    writer.writerow([])
+    writer.writerow(['BUDGETS'])
+    writer.writerow(['Category', 'Amount', 'Spent', 'Remaining', 'Period', 'Alert Threshold'])
+    budgets = Budget.objects.filter(user=request.user)
+    if budgets:
+        for b in budgets:
+            remaining = b.amount - b.spent
+            writer.writerow([
+                b.category.name, 
+                f"${b.amount:.2f}", 
+                f"${b.spent:.2f}", 
+                f"${remaining:.2f}", 
+                b.period, 
+                f"{b.alert_threshold}%"
+            ])
+    else:
+        writer.writerow(['No budgets found.'])
+
+    # Goals
+    writer.writerow([])
+    writer.writerow(['GOALS'])
+    writer.writerow(['Name', 'Target Amount', 'Current Amount', 'Progress', 'Deadline', 'Description'])
+    goals = Goal.objects.filter(user=request.user)
+    if goals:
+        for g in goals:
+            progress = (g.current_amount / g.target_amount * 100) if g.target_amount > 0 else 0
+            writer.writerow([
+                g.name, 
+                f"${g.target_amount:.2f}", 
+                f"${g.current_amount:.2f}", 
+                f"{progress:.1f}%",
+                g.deadline.strftime('%Y-%m-%d') if g.deadline else 'N/A', 
+                g.description
+            ])
+    else:
+        writer.writerow(['No goals found.'])
+
+    return response
+@login_required
+def export_financial_report_pdf(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="financial_report.pdf"'
+    
+    # Crear el documento PDF
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+    
+    # Estilos
+    styles = getSampleStyleSheet()
+    title_style = styles['Heading1']
+    title_style.alignment = 1  # Centrado
+    title_style.textColor = colors.blue
+    
+    section_style = styles['Heading2']
+    section_style.textColor = colors.blue
+    
+    # Añadir logo
+    logo_path = 'static/images/Logo.png'
+    if os.path.exists(logo_path):
+        img = Image(logo_path, width=120, height=120)
+        img.hAlign = 'CENTER'
+        elements.append(img)
+        elements.append(Spacer(1, 10))  # Espacio entre logo y título
+
+    elements.append(Paragraph("Financial Report", title_style))
+    elements.append(Spacer(1, 20))
+    # Fecha del reporte
+    from datetime import datetime
+    date_style = styles['Normal']
+    date_style.alignment = 1
+    elements.append(Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", date_style))
+    elements.append(Spacer(1, 30))
+    
+    # Transacciones
+    elements.append(Paragraph("Transactions", section_style))
+    elements.append(Spacer(1, 10))
+    
+    # Datos de transacciones
+    transactions = Transaction.objects.filter(user=request.user)
+    if transactions:
+        data = [['Date', 'Amount', 'Category', 'Description', 'Type', 'Merchant']]
+        for t in transactions:
+            data.append([
+                t.date.strftime('%Y-%m-%d'),
+                f"${t.amount:.2f}",
+                t.category.name,
+                t.description[:30] + '...' if len(t.description) > 30 else t.description,
+                t.transaction_type,
+                t.merchant
+            ])
+        
+        # Crear tabla
+        table = Table(data, repeatRows=1)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey])
+        ]))
+        elements.append(table)
+    else:
+        elements.append(Paragraph("No transactions found.", styles['Normal']))
+    
+    elements.append(Spacer(1, 20))
+    
+    # Presupuestos
+    elements.append(Paragraph("Budgets", section_style))
+    elements.append(Spacer(1, 10))
+    
+    # Datos de presupuestos
+    budgets = Budget.objects.filter(user=request.user)
+    if budgets:
+        data = [['Category', 'Amount', 'Spent', 'Remaining', 'Period', 'Alert']]
+        for b in budgets:
+            remaining = b.amount - b.spent
+            data.append([
+                b.category.name,
+                f"${b.amount:.2f}",
+                f"${b.spent:.2f}",
+                f"${remaining:.2f}",
+                b.period,
+                f"{b.alert_threshold}%"
+            ])
+        
+        # Crear tabla
+        table = Table(data, repeatRows=1)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey])
+        ]))
+        elements.append(table)
+    else:
+        elements.append(Paragraph("No budgets found.", styles['Normal']))
+    
+    elements.append(Spacer(1, 20))
+    
+    # Metas
+    elements.append(Paragraph("Goals", section_style))
+    elements.append(Spacer(1, 10))
+    
+    # Datos de metas
+    goals = Goal.objects.filter(user=request.user)
+    if goals:
+        data = [['Name', 'Target', 'Current', 'Progress', 'Deadline']]
+        for g in goals:
+            progress = (g.current_amount / g.target_amount * 100) if g.target_amount > 0 else 0
+            data.append([
+                g.name,
+                f"${g.target_amount:.2f}",
+                f"${g.current_amount:.2f}",
+                f"{progress:.1f}%",
+                g.deadline.strftime('%Y-%m-%d') if g.deadline else 'N/A'
+            ])
+        
+        # Crear tabla
+        table = Table(data, repeatRows=1)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey])
+        ]))
+        elements.append(table)
+    else:
+        elements.append(Paragraph("No goals found.", styles['Normal']))
+    
+    # Pie de página
+    footer_text = "MyFinPlanner - Your Financial Companion"
+    elements.append(Spacer(1, 30))
+    footer_style = styles['Normal']
+    footer_style.alignment = 1
+    footer_style.textColor = colors.grey
+    elements.append(Paragraph(footer_text, footer_style))
+    
+    # Construir el PDF
+    doc.build(elements)
+    return response

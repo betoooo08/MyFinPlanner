@@ -149,6 +149,28 @@
     </div>
   </div>
 
+  <!-- Añadir esto después de la sección de AI Insights en templates/reports.html -->
+<div class="report-section mt-8">
+  <h2 class="report-section-title">Export Financial Data</h2>
+  <p class="report-section-description">Download your financial data in different formats</p>
+  
+  <div class="flex gap-4 mt-4">
+    <a href="{% url 'export_financial_report_pdf' %}" class="generate-btn" style="max-width: 200px;">
+      <i class="fas fa-file-pdf"></i>
+      Export as PDF
+    </a>
+    
+    <a href="{% url 'export_financial_report_csv' %}" class="generate-btn" style="max-width: 200px; background-color: #10b981;">
+      <i class="fas fa-file-csv"></i>
+      Export as CSV
+    </a>
+  </div>
+  
+  <div class="mt-4 text-sm text-gray-500">
+    <p><i class="fas fa-info-circle mr-2"></i> Exports include your transactions, budgets, and financial goals.</p>
+  </div>
+</div>
+
   <!-- Saved Reports Section -->
   <div class="report-section mt-8">
     <h2 class="report-section-title">Saved Reports</h2>
