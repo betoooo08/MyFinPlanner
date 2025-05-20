@@ -181,12 +181,28 @@ def delete_transaction(request, pk):
 def budget_list(request):
     budgets = Budget.objects.filter(user=request.user)
 
-    # Añadimos las transacciones relacionadas a cada presupuesto
+    # Vinculamos transacciones a cada presupuesto
     for budget in budgets:
         budget.transactions = Transaction.objects.filter(
             user=request.user,
             category=budget.category
         )
+
+    #  —————— ALERTAS DE PRESUPUESTO ——————
+    for budget in budgets:
+        pct = budget.percentage
+        # Alcanza umbral (>= alert_threshold y <=100%)
+        if pct >= budget.alert_threshold and pct <= 100:
+            messages.warning(
+                request,
+                f'Has usado {pct}% de tu presupuesto "{budget.category.name}".'
+            )
+        # Lo supera (>100%)
+        if pct > 100:
+            messages.error(
+                request,
+                f'¡Has excedido tu presupuesto "{budget.category.name}" en {pct-100}%!'
+            )
 
     return render(request, 'budgets.html', {
         'budgets': budgets,

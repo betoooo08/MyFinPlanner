@@ -17,3 +17,10 @@ class FinancesConfig(AppConfig):
 
     def ready(self):
         post_migrate.connect(seed_categories, sender=self)
+
+class FinancesConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'finances'
+
+    def ready(self):
+        import finances.signals

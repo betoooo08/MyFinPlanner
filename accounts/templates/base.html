@@ -920,9 +920,43 @@
                 <a href="#pricing" class="text-gray-600 hover:text-blue-600 transition-colors">Pricing</a>
             </nav>
             <div class="flex items-center gap-3">
-                <a href="{% url 'login' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Log In</a>
-                <a href="{% url 'signup' %}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Sign Up</a>
-            </div>
+  {% if user.is_authenticated %}
+    <details class="relative">
+      <summary class="flex items-center gap-2 cursor-pointer select-none">
+        <img
+          src="{% static 'images/profilee.png' %}"
+          alt="{{ user.username }}"
+          class="w-8 h-8 rounded-full border-2 border-white"
+        >
+        <span class="hidden md:inline text-gray-700 font-medium">{{ user.username }}</span>
+      </summary>
+      <ul class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-20">
+        <li>
+          <a href="{% url 'profile' %}"
+            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+            Perfil
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'logout' %}"
+            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+            Cerrar sesión
+          </a>
+        </li>
+      </ul>
+    </details>
+  {% else %}
+    <a href="{% url 'login' %}"
+       class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+      Log In
+    </a>
+    <a href="{% url 'signup' %}"
+       class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+      Sign Up
+    </a>
+  {% endif %}
+</div>
+
         </div>
     </header>
 

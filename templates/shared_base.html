@@ -31,12 +31,35 @@
         <button class="btn btn-ghost btn-icon" aria-label="Settings">
           <i data-lucide="settings"></i>
         </button>
-        <div class="avatar">
-          <div class="avatar-image">
-            <img src="https://via.placeholder.com/40" alt="User" />
-          </div>
-          <div class="avatar-fallback">User</div>
-        </div>
+
+        {% if user.is_authenticated %}
+  <details class="relative">
+    <summary class="flex items-center gap-2 select-none">
+      <div class="avatar-image">
+        <img
+          src="{% static 'images/profilee.png' %}"
+          alt="{{ user.username }}"
+        >
+      </div>
+      <span class="hidden md:inline text-gray-700 font-medium">{{ user.username }}</span>
+    </summary>
+    <ul>
+      <li>
+        <a href="{% url 'profile' %}">Perfil</a>
+      </li>
+      <li>
+        <a href="{% url 'logout' %}">Cerrar sesión</a>
+      </li>
+    </ul>
+  </details>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn btn-outline">
+            Log In
+          </a>
+          <a href="{% url 'signup' %}" class="btn btn-primary">
+            Sign Up
+          </a>
+        {% endif %}
       </div>
     </header>
 
@@ -102,11 +125,10 @@
             Budgets
           </a>
           <a href="{% url 'investment_list' %}" 
-              class="nav-link {% if active_page == 'investments' %}active{% endif %}">
+             class="nav-link {% if active_page == 'investments' %}active{% endif %}">
             <i data-lucide="dollar-sign"></i>
             Investments
           </a>
-          
           <a href="{% url 'goal_list' %}"
              class="nav-link {% if active_page == 'goals' %}active{% endif %}">
             <i data-lucide="target"></i>

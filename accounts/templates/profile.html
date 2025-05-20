@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}MyFinPlanner - Mi perfil{% endblock %}
+{% block content %}
+  <div class="container mx-auto p-8">
+    <h1 class="text-2xl font-bold">Hola, {{ user.username }}!</h1>
+    <p>Email: {{ user.email }}</p>
+    <!-- aquí más datos o un form para editar perfil -->
+  </div>
+{% endblock %}

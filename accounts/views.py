@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib import messages
 from .forms import CustomUserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 def home_view(request):
     return render(request, 'home.html', {
-        'active_page': 'home'  # Asegúrate de que coincida con el menú
+        'active_page': 'home'
     })
 
 def signup_view(request):
@@ -25,3 +27,8 @@ def signup_view(request):
 def login_view(request):
     return render(request, 'login.html')
 
+@login_required
+def profile_view(request):
+    return render(request, 'profile.html', {
+        'user': request.user
+    })
