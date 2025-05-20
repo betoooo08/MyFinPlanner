@@ -51,7 +51,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,  # Esto permite que Django busque plantillas en las carpetas de las apps
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -131,3 +131,4 @@ DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 
 # indica a Django que la URL de login es /login/
 LOGIN_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/login/' 
