@@ -1394,6 +1394,19 @@
   margin-right: 0.5rem;
 }
 
+/* ----- Budgets progress bar styling ----- */
+.progress-container {
+  background-color: #e5e7eb;    /* Tailwind gray-200 */
+  border-radius: 0.375rem;      /* Tailwind rounded-md */
+  overflow: hidden;
+  height: 0.5rem;               /* ajusta altura */
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
 .insights-section {
   margin-top: 2.5rem;
   padding-top: 2rem;
@@ -1679,4 +1692,23 @@
   font-size: 2rem;
   margin-bottom: 1rem;
   color: #8b5cf6;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+.btn-ghost:hover {
+  background: #f3f4f6;
+}
+
+/* color de los radios en tema claro */
+input[type="radio"] {
+  accent-color: #2563eb; /* azul Tailwind-600 */
+}
+
+/* color de los radios en tema oscuro */
+.dark input[type="radio"] {
+  accent-color: #93c5fd; /* azul más suave para dark */
 }

@@ -843,3 +843,57 @@ header details ul li a {
 header details ul li a:hover {
   background: #f3f4f6;
 }
+
+/* color de los radios en tema claro */
+input[type="radio"] {
+  accent-color: #2563eb; /* azul Tailwind-600 */
+}
+
+/* color de los radios en tema oscuro */
+.dark input[type="radio"] {
+  accent-color: #93c5fd; /* azul más suave para dark */
+}
+
+.goal-status-badge.on-track {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.goal-status-badge.needs-attention {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.goal-status-badge.behind-schedule {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.goal-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.goal-filter {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.goal-filter input {
+  margin-right: 0.5rem;
+}
+
+/* ----- Budgets progress bar styling ----- */
+.progress-container {
+  background-color: #e5e7eb;    /* Tailwind gray-200 */
+  border-radius: 0.375rem;      /* Tailwind rounded-md */
+  overflow: hidden;
+  height: 0.5rem;               /* ajusta altura */
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+}

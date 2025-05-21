@@ -1,23 +1,38 @@
 {% extends 'shared_base.html' %}
-{% block title %}MyFinPlanner - Transaction Form{% endblock %}
+
+{% block title %}MyFinPlanner – Add Transaction{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <h2>Add Transaction</h2>
+<div class="container mx-auto py-8">
+  <div class="card max-w-lg mx-auto p-6">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Add Transaction</h2>
 
-  <!-- Mostrar mensajes de éxito o error -->
-  {% if messages %}
-  <div class="messages mb-4">
-    {% for message in messages %}
-    <div class="alert {{ message.tags }}">{{ message }}</div>
-    {% endfor %}
+    {% if messages %}
+    <div class="space-y-2 mb-6">
+      {% for message in messages %}
+      <div class="alert {{ message.tags }} px-4 py-2 rounded shadow">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for field in form %}
+      <div>
+        {{ field.label_tag }}
+        {{ field }}
+        {{ field.errors }}
+      </div>
+      {% endfor %}
+
+      <div class="flex justify-end gap-3 mt-6">
+        <a href="{% url 'transaction_list' %}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
   </div>
-  {% endif %}
-
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save</button>
-  </form>
 </div>
 {% endblock %}
