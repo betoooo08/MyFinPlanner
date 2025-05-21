@@ -2,6 +2,15 @@
 {% block title %}MyFinPlanner - Mi perfil{% endblock %}
 {% block content %}
   <div class="container mx-auto p-8">
+    {# —————— Botón para volver al Dashboard —————— #}
+    <div class="mb-6">
+      <a href="{% url 'dashboard' %}"
+         class="inline-flex items-center gap-2 btn btn-ghost">
+        <i data-lucide="home" class="h-4 w-4"></i>
+        Back to Dashboard
+      </a>
+    </div>
+
     <h1 class="text-2xl font-bold">Hola, {{ user.username }}!</h1>
     <p>Email: {{ user.email }}</p>
     <!-- aquí más datos o un form para editar perfil -->

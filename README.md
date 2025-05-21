@@ -1,6 +1,6 @@
 # MyFinPlanner 📊💰
 
-**MyFinPlanner** MyFinPlanner is  a web application for individuals who want to manage effectively their personal finances. The app allows users to track income and expenses, set budgets, and gain insights into spending habits.  
+**MyFinPlanner** is  a web application for individuals who want to manage effectively their personal finances. The app allows users to track income and expenses, set budgets, and gain insights into spending habits.  
 It includes **MyFinancePal**, an AI-powered financial assistant that provides visualizations and recommendations based on spending patterns.
 
 ## 🚀 Features
