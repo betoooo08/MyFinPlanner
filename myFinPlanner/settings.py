@@ -132,3 +132,6 @@ DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 # indica a Django que la URL de login es /login/
 LOGIN_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/login/' 
+
+#IP del servidow AWS 
+ALLOWED_HOSTS = ['174.129.81.11']
