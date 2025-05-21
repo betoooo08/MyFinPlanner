@@ -16,7 +16,9 @@ SECRET_KEY = 'django-insecure-k&33l24mir!g^rpei#+4ig(w*(*k&em#ohuzp2&krk6l%qp-19
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#IP del servidow AWS 
+ALLOWED_HOSTS = ['3.84.44.51']
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -133,5 +135,3 @@ DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 LOGIN_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/login/' 
 
-#IP del servidow AWS 
-ALLOWED_HOSTS = ['3.84.44.51']
